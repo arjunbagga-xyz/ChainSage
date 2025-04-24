@@ -171,11 +171,11 @@ async function submitFlipsideQuery(sqlQuery) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
+            'x-api-key': FLIPSIDE_API_KEY
             // API Key is passed in the body for ShroomDK v1
         },
         body: JSON.stringify({
-            sql: sqlQuery,
-            apiKey: FLIPSIDE_API_KEY, // API Key included in the body for this endpoint
+            sql: sqlQuery
         }),
     };
     // Endpoint for submitting query execution
