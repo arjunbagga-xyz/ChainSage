@@ -1,6 +1,6 @@
 
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY'; 
-const DUNE_API_KEY = 'YOUR_DUNE_API_KEY';
+const GEMINI_API_KEY = os.getenv("GEMINI_API")
+const DUNE_API_KEY = os.getenv("DUNE_API")
 const GEMINI_MODEL = 'gemini-2.0-flash'; 
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 const DUNE_API_URL = 'https://api.dune.com/api/v1';
