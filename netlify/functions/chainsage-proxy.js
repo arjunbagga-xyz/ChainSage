@@ -166,7 +166,7 @@ async function convertNLtoSQL(question) {
 
   const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (NL to SQL)');
 
-  if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+  if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error("Invalid response structure from Gemini (NL to SQL):", data);
       throw new Error('Received invalid response structure from Gemini (NL to SQL).');
   }
@@ -186,13 +186,11 @@ async function convertNLtoSQL(question) {
 
 // Submits the SQL query to Flipside V2 JSON-RPC for execution
 async function submitFlipsideQuery(sqlQuery) {
-    // Hardcoding required parameters for createQueryRun as indicated by previous errors.
+    // Hardcoding required parameters for createQueryRun based on user's working example (Step 1).
     // NOTE: Hardcoding sensitive or environment-specific values is NOT recommended
     // for production applications. Environment variables are preferred.
-    // Using "snowflake" and "flipside" as these were indicated as required fields
-    // in the previous MethodValidationError.
-    const hardcodedDataSource = "snowflake-default";
-    const hardcodedDataProvider = "flipside";
+    const hardcodedDataSource = "snowflake-default"; // Using value from user's Step 1
+    const hardcodedDataProvider = "flipside"; // Using value from user's Step 1
 
     const jsonRpcPayload = {
         "jsonrpc": "2.0",
@@ -200,8 +198,13 @@ async function submitFlipsideQuery(sqlQuery) {
         "params": [
             {
                 "sql": sqlQuery,
-                // Add required parameters, hardcoded as per user request
-                "maxAgeMinutes": 10, // Example: Cache results for 10 minutes (can be adjusted)
+                // Add required parameters, hardcoded based on user's example
+                "maxAgeMinutes": 0, // Using value from user's Step 1
+                "resultTTLHours": 1, // Including from user's Step 1
+                "tags": { // Including from user's Step 1
+                    "source": "chainsage-proxy", // Changed source tag
+                    "env": "netlify" // Changed env tag
+                },
                 "dataSource": hardcodedDataSource,
                 "dataProvider": hardcodedDataProvider
             }
@@ -222,8 +225,8 @@ async function submitFlipsideQuery(sqlQuery) {
     const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Submit Query)');
 
     // Flipside V2 returns the queryRunId in the 'result.queryRun.queryRunId' property
-    // Corrected access path based on the response structure in the logs
-    if (!data || !data.result || !data.result.queryRun || !data.result.queryRun.queryRunId) {
+    // Using optional chaining for a more resilient check, and checking the full path
+    if (!data?.result?.queryRun?.queryRunId) {
         console.error("Invalid response from Flipside submit:", data);
         throw new Error("Failed to submit query to Flipside: Invalid response structure.");
     }
@@ -258,7 +261,8 @@ async function getFlipsideQueryStatus(queryRunId) {
     const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Get Status)');
 
     // Flipside V2 returns status in data.result.status
-    if (!data || !data.result || !data.result.status) {
+    // Using optional chaining for a more resilient check
+    if (!data?.result?.status) {
         console.error("Invalid response from Flipside status check:", data);
         throw new Error("Failed to get query status from Flipside: Invalid response structure.");
     }
@@ -350,17 +354,35 @@ async function getFlipsideQueryResults(queryRunId) {
     const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Get Results)');
 
     // Flipside V2 returns results in data.result.rows and columnNames
-    if (data && data.result && data.result.rows) {
-        console.log(`Successfully fetched ${data.result.rows.length} rows from Flipside.`);
-        // Return an object containing both column names and rows for better context for summarization
-        return {
-            columnNames: data.result.columnNames,
-            rows: data.result.rows
-        };
-    } else {
+    // Using optional chaining for a more resilient check
+    if (!data?.result?.rows) {
         console.warn("Flipside response did not contain expected 'result' or 'rows' property:", data);
         return { columnNames: [], rows: [] }; // Return empty structure if no results found
     }
+
+    // Flipside V2 results structure includes columnNames at data.result.columnNames
+    // Using optional chaining for a more resilient check
+    if (!data?.result?.columnNames) {
+        console.warn("Flipside response did not contain expected 'columnNames' property:", data);
+        // Attempt to infer column names from the first row if available
+        if (data.result.rows.length > 0) {
+            console.warn("Attempting to infer column names from the first row.");
+             return {
+                columnNames: Object.keys(data.result.rows[0]), // Infer column names from keys of the first row object
+                rows: data.result.rows
+            };
+        } else {
+             return { columnNames: [], rows: [] }; // No data, no column names
+        }
+    }
+
+
+    console.log(`Successfully fetched ${data.result.rows.length} rows from Flipside.`);
+    // Return an object containing both column names and rows for better context for summarization
+    return {
+        columnNames: data.result.columnNames,
+        rows: data.result.rows
+    };
 }
 
 
@@ -417,7 +439,7 @@ async function summarizeFlipsideData(flipsideData, originalQuestion) {
 
   const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
+  if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
       console.error("Invalid response structure from Gemini (Summarization):", result);
       throw new Error('Received invalid response structure from Gemini during summarization.');
   }
