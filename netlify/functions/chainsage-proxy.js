@@ -130,22 +130,34 @@ async function fetchApi(url, options, serviceName) {
 // --- Flipside Crypto (V2 JSON-RPC) Workflow Functions ---
 
 // Converts natural language question to SQL using Gemini API
-// (This function remains the same, generating general SQL)
+// This function is updated to provide more specific guidance for Flipside SQL.
 async function convertNLtoSQL(question) {
   const prompt = `
-    You are an expert SQL writer specializing in blockchain data analysis.
-    Your task is to convert the following natural language question into a concise SQL query.
-    Focus on identifying the core data needed (e.g., balances, transactions, NFT data, volume).
-    Assume a standard blockchain data schema with tables like 'trades', 'transfers', 'balances', 'prices', etc.
-    Prioritize common blockchain data patterns (e.g., SELECT balance FROM balances WHERE address = ..., SELECT amount FROM transfers WHERE token = ...).
-    Include necessary filters like 'block_timestamp' or 'block_time' for time ranges if specified in the question. Use common table names like 'ethereum.core.fact_transactions', 'ethereum.core.fact_token_transfers', 'erc20.tokens' etc., which are common on platforms like Flipside.
+    You are an expert SQL writer specializing in blockchain data analysis, specifically for the Flipside Crypto data platform which uses Snowflake SQL.
+    Your task is to convert the following natural language question into a concise and valid SQL query for Flipside.
 
-    Instructions:
-    1. Analyze the question to understand the data needed.
-    2. Construct a simple, standard SQL query representing the data request, using common blockchain table names.
-    3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
-    4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
-    5. you are querying flipside API (https://docs.flipsidecrypto.xyz/data/flipside-data/data-table-documentation).
+    **Strict Guidelines for Flipside SQL Generation:**
+    1.  **Output Format:** Output ONLY the raw SQL query. Do NOT include any explanations, comments, markdown formatting (like \`\`\`sql\`), or any other text before or after the query.
+    2.  **Platform:** The target platform is **Flipside Crypto** and it uses **Snowflake SQL**.
+    3.  **Table Names:** Use standard Flipside table names. Prioritize these common tables:
+        * \`ethereum.core.fact_transactions\` (for basic transaction data)
+        * \`ethereum.core.fact_token_transfers\` (for token transfer events)
+        * \`erc20.tokens\` (for looking up token addresses by symbol)
+        * \`erc20.balances\` (for latest token balances per holder)
+        * \`ethereum.prices.fact_hourly_token_prices\` (for token prices)
+        * Use similar table names for other chains if the question specifies (e.g., \`solana.core.fact_transactions\`, \`polygon.core.fact_token_transfers\`).
+    4.  **Column Names:** Use standard Flipside column names like \`block_timestamp\`, \`block_time\`, \`tx_hash\`, \`from_address\`, \`to_address\`, \`contract_address\`, \`token_address\`, \`symbol\`, \`holder\`, \`balance\`, \`amount\`, \`price\`.
+    5.  **Date/Time Filtering:** Use \`block_timestamp\` or \`block_time\` for time filtering. Employ Snowflake-compatible functions:
+        * For "today": \`WHERE DATE(block_time) = CURRENT_DATE()\` or \`WHERE block_timestamp >= CURRENT_DATE()\`
+        * For time ranges: \`WHERE block_timestamp >= CURRENT_DATE() - INTERVAL 'N day'\` or \`INTERVAL 'N month'\`
+        * For hourly grouping: \`date_trunc('hour', block_timestamp)\`
+    6.  **Token Address Lookup:** To filter by a token symbol, always use a subquery on \`erc20.tokens\` to get the \`token_address\`. Example: \`WHERE token_address = (SELECT token_address FROM erc20.tokens WHERE symbol = 'TOKEN_SYMBOL')\`. Ensure the token symbol is in uppercase.
+    7.  **Token Balances:** The \`erc20.balances\` table provides the latest balance per \`holder\` for a given \`token_address\`. Filter by \`balance > 0\` to count actual holders.
+    8.  **Counting:** Use \`COUNT(DISTINCT column_name)\` for unique counts (e.g., \`COUNT(DISTINCT tx_hash)\`, \`COUNT(DISTINCT from_address)\`, \`COUNT(DISTINCT to_address)\`, \`COUNT(DISTINCT holder)\`).
+    9.  **Simplicity & Efficiency:** Generate the simplest possible query that answers the question using the available tables and columns. Avoid unnecessary complexity.
+    10. **Error Handling:** If the question is too complex, ambiguous, or cannot be answered with a single, standard Flipside SQL query, output: "ERROR: Cannot formulate query".
+
+    Analyze the following natural language question and generate the corresponding Flipside Snowflake SQL query:
 
     Natural Language Question:
     "${question}"
@@ -232,16 +244,25 @@ async function submitFlipsideQuery(sqlQuery) {
     console.log("Debug: data?.result?.queryRun?.queryRunId:", data?.result?.queryRun?.queryRunId);
     // --- End Debugging Logs ---
 
+    let queryRunId;
+    try {
+        // Explicitly try to access the nested property
+        queryRunId = data.result.queryRun.queryRunId;
+        console.log("Debug: Successfully accessed queryRunId:", queryRunId);
+    } catch (accessError) {
+        console.error("Debug: Error accessing queryRunId:", accessError);
+        console.error("Flipside submit response did not contain expected queryRunId structure:", data);
+        throw new Error(`Failed to submit query to Flipside: Could not extract queryRunId from response. Details: ${accessError.message}`);
+    }
 
-    // Flipside V2 returns the queryRunId in the 'result.queryRun.queryRunId' property
-    // Using optional chaining for a more resilient check, and checking the full path
-    if (!data?.result?.queryRun?.queryRunId) {
-        console.error("Invalid response from Flipside submit:", data);
-        throw new Error("Failed to submit query to Flipside: Invalid response structure.");
-    }
-
-    console.log("Flipside Query Submitted, Query Run ID:", data.result.queryRun.queryRunId);
-    return data.result.queryRun.queryRunId; // Corrected access path
+    // Check if the extracted queryRunId is a non-empty string
+    if (typeof queryRunId === 'string' && queryRunId.length > 0) {
+        console.log("Flipside Query Submitted, Query Run ID:", queryRunId);
+        return queryRunId;
+    } else {
+         console.error("Flipside submit response contained invalid or empty queryRunId:", data);
+         throw new Error("Failed to submit query to Flipside: Invalid or empty queryRunId received.");
+    }
 }
 
 // Gets the status of a Flipside V2 JSON-RPC query execution
