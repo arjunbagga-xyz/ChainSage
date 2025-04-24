@@ -15,7 +15,7 @@ const FLIPSIDE_API_KEY = process.env.FLIPSIDE_API;
 
 // Basic validation to ensure keys are set during deployment/runtime
 if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
-    console.error("FATAL: API keys are not set as environment variables!");
+    console.error("FATAL: Required API keys (GEMINI_API, FLIPSIDE_API) are not set as environment variables!");
     // In a real application, you might want more robust error handling here,
     // but for a serverless function, logging helps diagnose setup issues.
 }
@@ -186,16 +186,24 @@ async function convertNLtoSQL(question) {
 
 // Submits the SQL query to Flipside V2 JSON-RPC for execution
 async function submitFlipsideQuery(sqlQuery) {
+    // Hardcoding required parameters for createQueryRun as indicated by previous errors.
+    // NOTE: Hardcoding sensitive or environment-specific values is NOT recommended
+    // for production applications. Environment variables are preferred.
+    // Using "snowflake" and "flipside" as these were indicated as required fields
+    // in the previous MethodValidationError.
+    const hardcodedDataSource = "snowflake-default";
+    const hardcodedDataProvider = "flipside";
+
     const jsonRpcPayload = {
         "jsonrpc": "2.0",
         "method": "createQueryRun", // JSON-RPC method to create a query run
         "params": [
             {
                 "sql": sqlQuery,
-                // Add required parameters for createQueryRun as indicated by the error
-                "maxAgeMinutes": 10, // Example: Cache results for 10 minutes
-                "dataSource": "snowflake-default", // Example: Specify data source
-                "dataProvider": "flipside" // Example: Specify data provider
+                // Add required parameters, hardcoded as per user request
+                "maxAgeMinutes": 10, // Example: Cache results for 10 minutes (can be adjusted)
+                "dataSource": hardcodedDataSource,
+                "dataProvider": hardcodedDataProvider
             }
         ],
         "id": 1 // Request ID
@@ -213,14 +221,15 @@ async function submitFlipsideQuery(sqlQuery) {
     // Use the V2 JSON-RPC endpoint
     const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Submit Query)');
 
-    // Flipside V2 returns the queryRunId in the 'result' property
-    if (!data || !data.result || !data.result.queryRunId) {
+    // Flipside V2 returns the queryRunId in the 'result.queryRun.queryRunId' property
+    // Corrected access path based on the response structure in the logs
+    if (!data || !data.result || !data.result.queryRun || !data.result.queryRun.queryRunId) {
         console.error("Invalid response from Flipside submit:", data);
         throw new Error("Failed to submit query to Flipside: Invalid response structure.");
     }
 
-    console.log("Flipside Query Submitted, Query Run ID:", data.result.queryRunId);
-    return data.result.queryRunId;
+    console.log("Flipside Query Submitted, Query Run ID:", data.result.queryRun.queryRunId);
+    return data.result.queryRun.queryRunId; // Corrected access path
 }
 
 // Gets the status of a Flipside V2 JSON-RPC query execution
