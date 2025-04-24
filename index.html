@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChainSage</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Courier New', Courier, monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      position: relative;
+      overflow: hidden;
+      color: white;
+      background: radial-gradient(circle at center, #000000 0%, #000033 100%);
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.7;
+      z-index: -1;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.7; }
+      50% { opacity: 0.2; }
+      100% { opacity: 0.7; }
+    }
+
+    .wizard {
+  position: absolute;
+  bottom: 20px;
+  left: 80%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 240px;
+  background: url('assets/wizard.png') no-repeat center center;
+  background-size: contain;
+  z-index: 2;
+  /* Use drop-shadow for glow that follows transparency */
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8)) /* Cyan glow */
+          drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); /* White inner glow */
+  animation: pulseGlow 2s ease-in-out infinite; /* Optional pulsing animation */
+}
+
+/* Optional keyframes for a pulsing glow */
+@keyframes pulseGlow {
+  0% {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
+            drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1))
+            drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+  }
+  100% {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
+            drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  }
+}
+
+    .chat-container {
+      position: absolute;
+      bottom: 160px;
+      left: 50%;
+      transform: translateX(-50%);
+      max-width: 60%;
+      background: #ffffff20;
+      padding: 20px 15px;
+      border-radius: 15px;
+      backdrop-filter: blur(6px);
+      border: 1px solid #ffffff40;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    .chat {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      white-space: pre-line;
+    }
+
+    .chat-message {
+      margin-bottom: 10px;
+    }
+
+    .chat input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      background: #ffffff20;
+      transform: translateX(-50%);
+      backdrop-filter: blur(6px);
+      border: 1px solid #ffffff40;
+      font-size: 16px;
+      outline: none;
+      margin-top: 10px;
+      flex-direction: column;
+      z-index: 3;
+    }
+
+    .floating-element {
+      position: absolute;
+      z-index: 0;
+    }
+  </style>
+
+<script src="spellbook.js"></script>
+</head>
+<body>
+  <div class="wizard"></div>
+
+  <div class="chat-container">
+    <div class="chat" id="chat-log">
+      <div class="chat-message">ChainSage: Ask me anything about the blockchain, mortal...</div>
+    </div>
+    <input type="text" id="question" placeholder="type here, mortal" onkeydown="handleEnter(event)"
+    style="background-color: transparent; border: none; color: white; outline: none;">
+  
+  </div>
+
+  <div id="floating-items"></div>
+  <div id="stars"></div>
+
+  <script>
+
+    // Dynamically populate floating items from assets/floating
+    const floatingDiv = document.getElementById('floating-items');
+    const floatingAssets = [
+      'usd-coin.png',
+      'vechain.png',
+      'bitcoin.png',
+      'blockchain (1).png',
+      'blockchain (2).png',
+      'blockchain (3).png',
+      'blockchain (4).png',
+      'bnb.png',
+      'chainlink.png',
+      'crypto.png',
+      'cryptocurrencies.png',
+      'cryptocurrency (2).png',
+      'cryptocurrency (3).png',
+      'cryptocurrency.png',
+      'ethereum.png',
+      'graph.png',
+      'klaytn.png',
+      'online-business.png',
+      'polygon.png',
+      'shiba-inu.png',
+      'solana.png',
+      'stellar-coin.png',
+      'tether.png',
+      'ton.png'
+    ];
+
+    floatingAssets.forEach((src, index) => {
+      const img = document.createElement('img');
+      img.src = `assets/floating/${src}`;
+      img.className = 'floating-element';
+      img.style.top = `${Math.random() * 100}%`; // Full screen height
+      img.style.left = `${Math.random() * 100}%`; // Full screen width
+      img.style.width = '40px';
+
+      const animationName = `floatRandom${index}`;
+      const keyframes = `
+        @keyframes ${animationName} {
+          0% { transform: translate(0, 0) rotate(0deg); }
+          25% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
+          50% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
+          75% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
+          100% { transform: translate(0, 0) rotate(0deg); }
+        }
+      `;
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = keyframes;
+      document.head.appendChild(styleSheet);
+
+      img.style.animation = `${animationName} ${8 + Math.random() * 4}s ease-in-out infinite`;
+      floatingDiv.appendChild(img);
+    });
+
+    // Dynamically populate stars
+    const starsDiv = document.getElementById('stars');
+    const starCount = 100; // Number of stars
+
+    for (let i = 0; i < starCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      
+      // Random size (0.5px to 2px)
+      const size = 0.5 + Math.random() * 1.5;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      
+      // Random position
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.left = `${Math.random() * 100}%`;
+      
+      // Random twinkle animation
+      const duration = 2 + Math.random() * 3; // 2-5 seconds
+      const delay = Math.random() * 2; // 0-2 seconds
+      star.style.animation = `twinkle ${duration}s infinite ${delay}s`;
+      
+      starsDiv.appendChild(star);
+    }
+  </script>
+</body>
+</html>
