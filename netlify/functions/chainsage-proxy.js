@@ -191,7 +191,11 @@ async function submitFlipsideQuery(sqlQuery) {
         "method": "createQueryRun", // JSON-RPC method to create a query run
         "params": [
             {
-                "sql": sqlQuery
+                "sql": sqlQuery,
+                // Add required parameters for createQueryRun as indicated by the error
+                "maxAgeMinutes": 10, // Example: Cache results for 10 minutes
+                "dataSource": "snowflake", // Example: Specify data source
+                "dataProvider": "flipside" // Example: Specify data provider
             }
         ],
         "id": 1 // Request ID
