@@ -15,6 +15,12 @@
   # and bundles functions in the specified directory.
   # command = "npm install" # Example if you needed a specific build step
 
+[functions]
+  # Explicitly set the Node.js version for functions
+  # Using a recent, stable LTS version is recommended.
+  # Check Netlify docs for supported versions: https://docs.netlify.com/functions/build-with-javascript/#runtime-settings
+  node_bundler = "esbuild" # Use esbuild for potentially better bundling
+
 # You can add other configurations here, like environment variables
 # (though setting them in the UI is often easier for secrets)
 # or redirects.
