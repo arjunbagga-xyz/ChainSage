@@ -1,8 +1,8 @@
 {
-  "name": "chainsage-project",
+  "name": "chainsage",
   "version": "1.0.0",
-  "description": "ChainSage web application",
-  "main": "index.html",
+  "description": "...",
+  "main": "...",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
