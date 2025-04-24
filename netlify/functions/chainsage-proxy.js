@@ -1,53 +1,60 @@
 // This Netlify Serverless Function acts as a backend proxy
-// to securely handle API calls to Gemini and Dune Analytics.
-// It receives a question from the frontend, performs the
-// Dune/Gemini workflow, and returns the summary.
+// to securely handle API calls to Gemini and Covalent Goldrush.
+// It receives a question from the frontend, uses Gemini to
+// generate SQL, then uses Gemini again to map SQL to Covalent
+// API calls, executes Covalent calls, uses Gemini to summarize,
+// and returns the summary.
 
 // Netlify's Node.js environment supports native fetch
 // const fetch = require('node-fetch'); // Uncomment if using node-fetch locally or on older Node
 
 // Retrieve API keys from Netlify Environment Variables.
 // These variables are set securely in your Netlify site settings.
-// The names 'GEMINI_API' and 'DUNE_API' should match the names you set in Netlify.
+// The names 'GEMINI_API' and 'COVALENT_API' should match the names you set in Netlify.
 const GEMINI_API_KEY = process.env.GEMINI_API;
-const DUNE_API_KEY = process.env.DUNE_API;
+const COVALENT_API_KEY = process.env.COVALENT_API; // Renamed from DUNE_API
 
 // Basic validation to ensure keys are set during deployment/runtime
-if (!GEMINI_API_KEY || !DUNE_API_KEY) {
+if (!GEMINI_API_KEY || !COVALENT_API_KEY) {
     console.error("FATAL: API keys are not set as environment variables!");
     // In a real application, you might want more robust error handling here,
     // but for a serverless function, logging helps diagnose setup issues.
 }
 
 // --- API Configuration ---
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.0-flash'; // Or gemini-1.5-flash for potentially lower cost/higher context
 const GEMINI_API_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const DUNE_API_BASE_URL = 'https://api.dune.com/api/v1';
+const COVALENT_API_BASE_URL = 'https://api.covalenthq.com'; // Covalent Goldrush API Base URL
 
-// --- Recommended Settings for Automated SQL Generation ---
+// --- Recommended Settings for API Calls to Gemini ---
+// Settings for converting NL to SQL
 const SQL_GENERATION_CONFIG = {
-  temperature: 0.1, // Low temperature for predictability
-  topP: 0.05,       // Very low topP to focus on most likely tokens
+  temperature: 0.1,
+  topP: 0.05,
   candidateCount: 1,
 };
 
-// --- Recommended Settings for Summarization ---
+// Settings for mapping SQL to Covalent API calls
+const COVALENT_MAPPING_CONFIG = {
+    temperature: 0.1, // Keep low for predictable mapping
+    topP: 0.1,
+    candidateCount: 1,
+};
+
+// Settings for summarizing data
 const SUMMARIZATION_CONFIG = {
-  temperature: 1,
+  temperature: 0.7, // Allow some creativity for summary
   topP: 0.9,
   candidateCount: 1
 };
 
-const EXECUTION_POLL_INTERVAL = 5000; // Milliseconds
-const EXECUTION_MAX_WAIT_TIME = 90000; // Milliseconds (Increased timeout for potentially long queries)
-
-
 // --- Helper Function for Making API Calls from the Backend ---
 // This function centralizes fetching logic and error handling.
 async function fetchApi(url, options, serviceName) {
+    let response;
     try {
         console.log(`Calling external API: ${serviceName} - ${url}`);
-        const response = await fetch(url, options);
+        response = await fetch(url, options);
 
         if (!response.ok) {
             let errorBody = 'Could not parse error response.';
@@ -62,9 +69,15 @@ async function fetchApi(url, options, serviceName) {
             }
 
             // Construct a detailed error message
-            const errorMessage = `Error ${response.status} from ${serviceName}: ${errorBody.error?.message || errorBody.message || response.statusText || 'Unknown error'}`;
+            const errorMessage = `Error ${response.status} from ${serviceName}: ${errorBody.error || errorBody.message || response.statusText || 'Unknown error'}`;
             console.error(`API call failed to ${serviceName}:`, errorMessage);
-            throw new Error(errorMessage);
+
+            // Include status code and service name in the error object for specific handling
+            const apiError = new Error(errorMessage);
+            apiError.status = response.status;
+            apiError.service = serviceName;
+            apiError.body = errorBody; // Attach the parsed body/text for inspection
+            throw apiError;
         }
 
         const data = await response.json();
@@ -73,26 +86,34 @@ async function fetchApi(url, options, serviceName) {
 
     } catch (error) {
         console.error(`Fetch error during call to ${serviceName}:`, error);
-        // Re-throw the error with context
-        throw new Error(`API call failed to ${serviceName}: ${error.message}`);
+        // Re-throw the error with context and original error properties
+        if (error.service) { // If it's an API error we already processed
+             throw error;
+        }
+        // Otherwise, wrap a general fetch error
+        const fetchErr = new Error(`API call failed to ${serviceName}: ${error.message}`);
+        fetchErr.originalError = error; // Keep original error for debugging
+        throw fetchErr;
     }
 }
 
 
-// --- Dune Analytics Workflow Functions (Called by the main handler) ---
+// --- Core Workflow Functions (Called by the main handler) ---
 
-// Converts natural language question to SQL using Gemini API (securely from backend)
+// Converts natural language question to SQL using Gemini API
 async function convertNLtoSQL(question) {
   const prompt = `
-    You are an expert SQL writer specializing in Dune Analytics (which uses Spark SQL / PostgreSQL syntax).
-    Your task is to convert the following natural language question into a valid Dune SQL query.
+    You are an expert SQL writer specializing in blockchain data analysis.
+    Your task is to convert the following natural language question into a concise SQL query.
+    Focus on identifying the core data needed (e.g., balances, transactions, NFT data, volume).
+    Do NOT assume a specific database schema like Dune or Flipside. Just provide a general SQL representation of the data request.
+    Prioritize common blockchain data patterns (e.g., SELECT balance FROM accounts WHERE address = ..., SELECT amount FROM transfers WHERE token = ...).
 
     Instructions:
-    1.  Analyze the question carefully to understand the user's intent.
-    2.  Identify the relevant Dune tables (e.g., dex.trades, nft.trades, ethereum.transactions, etc.) and columns needed. Refer to Dune schema if necessary, but prioritize common tables.
-    3.  Construct a syntactically correct Spark SQL / PostgreSQL query.
-    4.  IMPORTANT: Output ONLY the raw SQL query. Do not include any explanations, comments, markdown formatting (like \`\`\`sql), or introductory phrases.
-    5.  If the question is ambiguous or lacks necessary details (like specific contract addresses, date ranges, or chains), make reasonable assumptions (e.g., use Ethereum mainnet, a recent time range like 'last 7 days' if unspecified) BUT try your best to generate a usable query. If it's impossible to generate a meaningful query, output the text: "ERROR: Ambiguous question".
+    1. Analyze the question to understand the data needed.
+    2. Construct a simple, general SQL query representing the data request.
+    3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
+    4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
 
     Natural Language Question:
     "${question}"
@@ -104,8 +125,7 @@ async function convertNLtoSQL(question) {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          // API Key is added here on the server side using process.env
-          'x-goog-api-key': GEMINI_API_KEY, // Correct header for Gemini REST API
+          'x-goog-api-key': GEMINI_API_KEY,
       },
       body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
@@ -113,12 +133,11 @@ async function convertNLtoSQL(question) {
       }),
   };
 
-  const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (SQL Generation)');
+  const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (NL to SQL)');
 
-  // Validate response structure
   if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-      console.error("Invalid response structure from Gemini:", data);
-      throw new Error('Received invalid response structure from Gemini.');
+      console.error("Invalid response structure from Gemini (NL to SQL):", data);
+      throw new Error('Received invalid response structure from Gemini (NL to SQL).');
   }
 
   let sqlQuery = data.candidates[0].content.parts[0].text.trim();
@@ -126,172 +145,177 @@ async function convertNLtoSQL(question) {
   // Clean up potential markdown code blocks
   sqlQuery = sqlQuery.replace(/^```sql\s*/i, '').replace(/```$/, '').trim();
 
-  // Basic check for error markers or trivial responses from the model
-  if (sqlQuery.startsWith("ERROR:") || sqlQuery.length < 10) {
-      throw new Error(`Gemini indicated an issue or returned a non-query response: ${sqlQuery}`);
+  if (sqlQuery.startsWith("ERROR:") || sqlQuery.length < 5) { // Basic check for errors or trivial responses
+      throw new Error(`Gemini could not formulate a SQL query for the question.`);
   }
 
   console.log("Generated SQL:", sqlQuery);
   return sqlQuery;
 }
 
-// Creates a new query on Dune Analytics (securely from backend)
-async function createDuneQuery(sqlQuery, question) {
-  const options = {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'X-DUNE-API-KEY': DUNE_API_KEY, // API Key is added here on the server side
-      },
-      body: JSON.stringify({
-          name: `ChainSage Query - ${new Date().toISOString()}`,
-          description: `Generated by ChainSage for question: ${question}`,
-          query_sql: sqlQuery,
-          is_private: true, // Keep generated queries private
-      }),
-  };
-  const data = await fetchApi(`${DUNE_API_BASE_URL}/query`, options, 'Dune (Create Query)');
-  console.log("Dune Query Created, ID:", data.query_id);
-  return data.query_id;
-}
+// Uses Gemini to map the generated SQL to a Covalent API call
+async function mapSQLtoCovalentApi(sqlQuery, originalQuestion) {
+    // NOTE: This prompt requires Gemini to understand Covalent's API structure.
+    // The accuracy of this mapping depends heavily on Gemini's training data
+    // and the specificity of the prompt. You might need to refine this prompt
+    // significantly based on testing.
+    const prompt = `
+    Analyze the following SQL query, which represents a user's blockchain data request.
+    Your goal is to identify the core data being requested (e.g., token balances, NFT transfers, transactions for an address, historical prices) and map it to the most relevant Covalent Goldrush API endpoint(s).
+    Provide the endpoint path and necessary parameters in a structured JSON format.
+    If the SQL query cannot be mapped to a suitable Covalent endpoint, return a specific JSON indicating this.
 
-// Executes a query on Dune Analytics (securely from backend)
-async function executeDuneQuery(queryId) {
-  const options = {
-      method: 'POST',
-      headers: {
-          'X-DUNE-API-KEY': DUNE_API_KEY, // API Key is added here on the server side
-          'Content-Type': 'application/json',
-      },
-      // Optional: Add performance tier if needed: body: JSON.stringify({ performance: 'medium' })
-  };
-  const data = await fetchApi(`${DUNE_API_BASE_URL}/query/${queryId}/execute`, options, 'Dune (Execute Query)');
-  console.log("Dune Query Execution Started, Execution ID:", data.execution_id);
-  return data.execution_id;
-}
+    Covalent Goldrush API Documentation Overview: ${COVALENT_API_BASE_URL}/docs/api/
 
-// Gets the status of an execution on Dune Analytics (securely from backend)
-async function getExecutionStatus(executionId) {
-  const options = {
-      method: 'GET',
-      headers: {
-          'X-DUNE-API-KEY': DUNE_API_KEY, // API Key is added here on the server side
-      },
-  };
-  // Use fetch directly here because we only care about the status state,
-  // and a non-200 response might indicate a valid state like FAILED.
-  // The waitForExecution logic handles the state interpretation.
-  const response = await fetch(`${DUNE_API_BASE_URL}/execution/${executionId}/status`, options);
+    Common Covalent Endpoints (Examples - refer to full docs for details):
+    - Get token balances for address: /v1/{chain_id}/address/{address}/balances_v2/
+    - Get historical transactions for address: /v2/{chain_id}/address/{address}/transactions_v2/
+    - Get NFT transfers for contract: /v2/{chain_id}/nft/{contract_address}/token/{token_id}/transactions/ (for specific token ID)
+    - Get all NFT transfers for contract: /v2.{chain_id}/nft/{contract_address}/transactions/ (requires pagination handling)
+    - Get historical prices for token: /v1/pricing/historical_by_token_ids_v2/{chain_id}/latest/
 
-  if (!response.ok) {
-      // Log the error but don't throw immediately, let waitForExecution handle it
-      console.error(`Error fetching status for ${executionId}: ${response.status} ${response.statusText}`);
-       // You might want to throw a specific error here if the status fetch itself fails critically
-       // throw new Error(`Failed to fetch execution status (${response.status})`);
-  }
-  const data = await response.json();
-  return data.state;
-}
+    Instructions:
+    1. Analyze the provided SQL query and the original natural language question.
+    2. Determine the most appropriate Covalent API endpoint(s) to fulfill the request.
+    3. Identify the required parameters (chain_id, address, contract_address, token_id, etc.) from the SQL or original question. Make reasonable assumptions if parameters are missing (e.g., assume Ethereum if chain is not specified, use a placeholder like 'USER_ADDRESS_PLACEHOLDER' if an address is needed but not provided).
+    4. Format the output as a JSON object with the following structure:
+       {
+         "endpoint": "string", // The Covalent API path (e.g., "/v1/1/address/0x.../balances_v2/")
+         "method": "GET" | "POST", // HTTP method (most Covalent endpoints are GET)
+         "parameters": { // Object containing key-value pairs for query parameters or path segments
+           "chain_id": "string", // e.g., "1", "137", "eth-mainnet", "matic-mainnet"
+           // ... other parameters like "address", "contract-address", "token-id", "quote-currency", "from", "to", "page-size", "page-number"
+         },
+         "requires_address": boolean, // Set to true if an address is mandatory but not in the query/question
+         "requires_contract": boolean, // Set to true if a contract address is mandatory but not in the query/question
+         "requires_token_id": boolean, // Set to true if a token ID is mandatory but not in the query/question
+         "description": "string" // Brief description of the intended Covalent call
+       }
+    5. If the SQL query cannot be mapped to a suitable Covalent endpoint, return:
+       {
+         "error": "Cannot map query to Covalent endpoint",
+         "description": "The request type is not directly supported by the available Covalent API endpoints."
+       }
+    6. Ensure the JSON is valid and contains ONLY the JSON object. Do not include markdown formatting (\`\`\`json) or any other text.
 
-// Waits for a Dune execution to complete, with timeout
-async function waitForExecution(executionId) {
-  const startTime = Date.now();
-  console.log(`Waiting for execution ${executionId} to complete...`);
+    Original Question: "${originalQuestion}"
+    SQL Query: "${sqlQuery}"
 
-  while (true) {
-    // Check for timeout
-    if (Date.now() - startTime > EXECUTION_MAX_WAIT_TIME) {
-      console.error(`Query execution ${executionId} timed out.`);
-      throw new Error(`Query execution timed out after ${EXECUTION_MAX_WAIT_TIME / 1000} seconds.`);
+    Covalent API Mapping:
+    `;
+
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': GEMINI_API_KEY,
+        },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: COVALENT_MAPPING_CONFIG,
+        }),
+    };
+
+    const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (SQL to Covalent Mapping)');
+
+    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
+        console.error("Invalid response structure from Gemini (Mapping):", data);
+        throw new Error('Received invalid response structure from Gemini (SQL to Covalent Mapping).');
     }
+
+    let jsonString = data.candidates[0].content.parts[0].text.trim();
+
+     // Clean up potential markdown code blocks if the model adds them
+    jsonString = jsonString.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
 
     try {
-      const state = await getExecutionStatus(executionId);
-      console.log(`Execution ${executionId} state: ${state}`); // Log state for debugging
-
-      switch (state) {
-        case 'QUERY_STATE_COMPLETED':
-          console.log(`Execution ${executionId} completed successfully.`);
-          return true; // Success
-        case 'QUERY_STATE_FAILED':
-        case 'QUERY_STATE_CANCELLED':
-          console.error(`Execution ${executionId} failed or was cancelled.`);
-          throw new Error(`Query execution ${state.toLowerCase().replace('query_state_', '')}.`); // Terminal state
-        case 'QUERY_STATE_EXECUTING':
-        case 'QUERY_STATE_PENDING':
-          // Continue polling
-          break; // Explicitly break the switch to continue the loop
-        default:
-          console.warn(`Unknown execution state encountered for ${executionId}: ${state}`);
-          // Decide how to handle unknown states. For robustness, maybe throw after a few attempts.
-          throw new Error(`Encountered unknown execution state: ${state}`); // Treat as fatal for now
-      }
-    } catch (error) {
-       console.error(`Error during polling for execution ${executionId}:`, error);
-       // If getExecutionStatus throws, re-throw to break the wait loop
-       throw new Error(`Polling error for execution ${executionId}: ${error.message}`);
+        const mapping = JSON.parse(jsonString);
+        console.log("Covalent Mapping:", mapping);
+        if (mapping.error) {
+             throw new Error(`Mapping failed: ${mapping.description || mapping.error}`);
+        }
+         if (!mapping.endpoint || !mapping.method || !mapping.parameters) {
+             throw new Error("Mapping returned invalid structure.");
+         }
+        return mapping;
+    } catch (e) {
+        console.error("Failed to parse Gemini mapping response:", jsonString, e);
+        throw new Error(`Failed to interpret Covalent API mapping from Gemini. Response: ${jsonString.substring(0, 200)}...`);
     }
-
-    // Wait before the next poll
-    await new Promise(resolve => setTimeout(resolve, EXECUTION_POLL_INTERVAL));
-  }
 }
 
 
-// Gets the results of a completed Dune execution (securely from backend)
-async function getExecutionResults(executionId) {
-  const options = {
-      method: 'GET',
-      headers: {
-          'X-DUNE-API-KEY': DUNE_API_KEY, // API Key is added here on the server side
-      },
-      // Optional: Add limit/offset for pagination if needed
-      // query parameters: ?limit=100&offset=0
-  };
-  const data = await fetchApi(`${DUNE_API_BASE_URL}/execution/${executionId}/results`, options, 'Dune (Get Results)');
+// Executes the Covalent API call based on the mapping
+async function executeCovalentApiCall(mapping) {
+    let url = `${COVALENT_API_BASE_URL}${mapping.endpoint}`;
+    const options = {
+        method: mapping.method,
+        headers: {
+             // Covalent API key is passed as a query parameter
+        },
+    };
 
-  if (data.result && data.result.rows) {
-      console.log(`Successfully fetched ${data.result.rows.length} rows.`);
-      return data.result.rows;
-  } else {
-      console.warn(`Execution results format unexpected for ${executionId}:`, data);
-      return []; // Return empty array if no rows found
-  }
+    // Add query parameters from the mapping, including the API key
+    const queryParams = new URLSearchParams(mapping.parameters);
+    queryParams.set('key', COVALENT_API_KEY); // Add API key securely
+
+    url = `${url}?${queryParams.toString()}`;
+
+    // NOTE: Covalent API has pagination for some endpoints (e.g., NFT transfers).
+    // This simple implementation doesn't handle pagination. For production,
+    // you might need to detect paginated endpoints and fetch multiple pages.
+
+    const data = await fetchApi(url, options, `Covalent (${mapping.description || mapping.endpoint})`);
+
+    // Covalent responses have a common structure, often with a 'data' property
+    if (data && data.data) {
+        console.log("Covalent Data Received:", data.data);
+        return data.data; // Return the relevant data part
+    } else {
+        console.warn("Covalent response did not contain expected 'data' property:", data);
+        return data; // Return raw response if structure is unexpected
+    }
 }
 
-// Summarizes data using Gemini API (securely from backend)
-async function summarizeData(data, originalQuestion) {
-  let dataToSend = data;
+// Summarizes the Covalent data using Gemini API
+async function summarizeCovalentData(covalentData, originalQuestion) {
+  let dataToSend = covalentData;
   const MAX_DATA_LENGTH = 5000; // Adjust based on typical data size and token limits
-  const jsonData = JSON.stringify(data);
+  const jsonData = JSON.stringify(covalentData);
 
   // Simple sampling if data is too large for the prompt
   if (jsonData.length > MAX_DATA_LENGTH) {
     console.warn(`Data size (${jsonData.length}) exceeds limit (${MAX_DATA_LENGTH}). Summarizing sampled data.`);
-    dataToSend = data.slice(0, Math.min(data.length, 50)); // Example: summarize first 50 rows
+    // Sample the data - this might need refinement based on data structure
+    if (Array.isArray(covalentData.items)) {
+         dataToSend = { ...covalentData, items: covalentData.items.slice(0, Math.min(covalentData.items.length, 50)) };
+    } else {
+         dataToSend = jsonData.substring(0, MAX_DATA_LENGTH) + "..."; // Fallback for non-array data
+    }
   }
 
-  if (dataToSend.length === 0) {
-      return "The query ran successfully but returned no data.";
+  if (!dataToSend || (Array.isArray(dataToSend.items) && dataToSend.items.length === 0)) {
+      return "The query ran successfully but returned no data from Covalent.";
   }
 
   const prompt = `
-    You are an insightful data analyst.
+    You are an insightful data analyst specializing in blockchain data.
     A user asked the following question: "${originalQuestion}"
-    A Dune Analytics query was run and returned the following data (potentially sampled if large):
-    ${JSON.stringify(dataToSend)}
+    Data was retrieved from the Covalent Goldrush API. Here is the relevant data (potentially sampled if large):
+    ${JSON.stringify(dataToSend, null, 2)}
 
     Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
-    Focus on answering the user's original question using the data.
+    Focus on answering the user's original question using the data provided.
     If the data doesn't directly answer the question, state that and summarize what the data DOES show.
-    Keep the summary brief (2-3 sentences).
+    Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
+    If the data indicates an error or no results, state that clearly.
   `;
 
   const options = {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_API_KEY, // API Key is added here on the server side
+          'x-goog-api-key': GEMINI_API_KEY,
       },
       body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
@@ -301,7 +325,6 @@ async function summarizeData(data, originalQuestion) {
 
   const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  // Validate response structure
   if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
       console.error("Invalid response structure from Gemini (Summarization):", result);
       throw new Error('Received invalid response structure from Gemini during summarization.');
@@ -317,11 +340,10 @@ async function summarizeData(data, originalQuestion) {
 // This is the entry point for the Netlify Function.
 // It receives the HTTP request and returns the HTTP response.
 exports.handler = async function(event, context) {
-    // Log the incoming request details (useful for debugging on Netlify)
+    // Log the incoming request details
     console.log("Received request:", {
         httpMethod: event.httpMethod,
         path: event.path,
-        // body: event.body // Be cautious logging sensitive info
     });
 
     // Only allow POST requests from the frontend
@@ -358,45 +380,52 @@ exports.handler = async function(event, context) {
 
     console.log(`Processing question: "${question}"`);
 
-    // --- Execute the full pipeline using the backend functions ---
+    let sqlQuery = null;
+    let covalentMapping = null;
+    let covalentData = null;
     let finalInsight = "An unexpected error occurred."; // Default error message
     let statusCode = 500; // Default status code for errors
 
     try {
-        // 1. Convert NL to SQL
-        const sqlQuery = await convertNLtoSQL(question);
+        // 1. Convert NL to SQL using Gemini
+        sqlQuery = await convertNLtoSQL(question);
         console.log("Step 1: NL to SQL completed.");
 
-        // 2. Create Dune Query
-        const queryId = await createDuneQuery(sqlQuery, question);
-        console.log("Step 2: Dune Query Created.");
+        // 2. Map SQL to Covalent API call(s) using Gemini
+        covalentMapping = await mapSQLtoCovalentApi(sqlQuery, question);
+        console.log("Step 2: SQL to Covalent Mapping completed.");
+        console.log("Mapped API Call:", covalentMapping);
 
-        // 3. Execute Dune Query
-        const executionId = await executeDuneQuery(queryId);
-        console.log("Step 3: Dune Execution Started.");
+        // --- Basic validation of mapping result ---
+        if (covalentMapping.requires_address || covalentMapping.requires_contract || covalentMapping.requires_token_id) {
+             // If Gemini indicates required parameters are missing, inform the user
+             let missingParams = [];
+             if(covalentMapping.requires_address) missingParams.push("a wallet address");
+             if(covalentMapping.requires_contract) missingParams.push("a contract address");
+             if(covalentMapping.requires_token_id) missingParams.push("a token ID");
 
-        // 4. Wait for Completion
-        await waitForExecution(executionId);
-        console.log("Step 4: Dune Execution Completed.");
+             finalInsight = `The Oracle needs more information to answer that question. Please provide ${missingParams.join(' and ')}.`;
+             statusCode = 200; // Return success status as we're providing information
 
-        // 5. Get Results
-        const results = await getExecutionResults(executionId);
-        console.log("Step 5: Dune Results Fetched.");
+        } else {
+            // 3. Execute the Covalent API call
+            covalentData = await executeCovalentApiCall(covalentMapping);
+            console.log("Step 3: Covalent API Call executed.");
 
-        // 6. Summarize Results
-        finalInsight = await summarizeData(results, question);
-        console.log("Step 6: Summarization Completed.");
+            // 4. Summarize Covalent Data using Gemini
+            finalInsight = await summarizeCovalentData(covalentData, question);
+            console.log("Step 4: Summarization Completed.");
+            statusCode = 200; // Success
+        }
 
-        // If all steps succeed, set success status code
-        statusCode = 200;
 
     } catch (error) {
+        // --- Handle Errors ---
         console.error('Error in Netlify function pipeline:', error);
         // Update the final insight to reflect the error
         finalInsight = `ChainSage Error: ${error.message}`;
-        // Keep the status code as 500 (Internal Server Error) for uncaught errors
-        // Specific API errors handled within fetchApi might throw errors with messages
-        // that are appropriate to return to the user.
+        // Keep the status code as 500 for internal errors
+        statusCode = 500;
     }
 
     // --- Return Response ---
@@ -406,9 +435,10 @@ exports.handler = async function(event, context) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             insight: finalInsight,
-            // You could add a 'success: boolean' flag here if needed by the frontend
-            // success: statusCode === 200
+            // Optionally include intermediate steps for debugging if needed
+            // sql: sqlQuery,
+            // mapping: covalentMapping,
+            // rawCovalentData: covalentData // Be cautious with large data
         }),
     };
 };
-
