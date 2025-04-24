@@ -23,7 +23,7 @@ if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
 // --- API Configuration ---
 const GEMINI_MODEL = 'gemini-2.0-flash'; // Or gemini-1.5-flash for potentially lower cost/higher context
 const GEMINI_API_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const FLIPSIDE_API_BASE_URL = 'https://node-api.flipsidecrypto.com'; // Flipside ShroomDK API Base URL
+const FLIPSIDE_API_BASE_URL = 'https://api-v2.flipsidecrypto.xyz'; // Flipside ShroomDK API Base URL
 
 // --- Recommended Settings for API Calls to Gemini ---
 // Settings for converting NL to SQL
