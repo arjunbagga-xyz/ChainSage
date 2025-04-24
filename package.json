@@ -1,0 +1,15 @@
+{
+  "name": "chainsage-project",
+  "version": "1.0.0",
+  "description": "ChainSage web application",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@flipsidecrypto/sdk": "^1.0.0"
+  }
+}
