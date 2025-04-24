@@ -1,8 +1,7 @@
 // This Netlify Serverless Function acts as a backend proxy
-// to securely handle API calls to Gemini and Covalent Goldrush.
+// to securely handle API calls to Gemini and Flipside Crypto (ShroomDK).
 // It receives a question from the frontend, uses Gemini to
-// generate SQL, then uses Gemini again to map SQL to Covalent
-// API calls, executes Covalent calls, uses Gemini to summarize,
+// generate SQL, executes the SQL on Flipside, uses Gemini to summarize,
 // and returns the summary.
 
 // Netlify's Node.js environment supports native fetch
@@ -10,12 +9,12 @@
 
 // Retrieve API keys from Netlify Environment Variables.
 // These variables are set securely in your Netlify site settings.
-// The names 'GEMINI_API' and 'COVALENT_API' should match the names you set in Netlify.
+// The names 'GEMINI_API' and 'FLIPSIDE_API' should match the names you set in Netlify.
 const GEMINI_API_KEY = process.env.GEMINI_API;
-const COVALENT_API_KEY = process.env.COVALENT_API; // Renamed from DUNE_API
+const FLIPSIDE_API_KEY = process.env.FLIPSIDE_API; // Renamed from COVALENT_API
 
 // Basic validation to ensure keys are set during deployment/runtime
-if (!GEMINI_API_KEY || !COVALENT_API_KEY) {
+if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
     console.error("FATAL: API keys are not set as environment variables!");
     // In a real application, you might want more robust error handling here,
     // but for a serverless function, logging helps diagnose setup issues.
@@ -24,7 +23,7 @@ if (!GEMINI_API_KEY || !COVALENT_API_KEY) {
 // --- API Configuration ---
 const GEMINI_MODEL = 'gemini-2.0-flash'; // Or gemini-1.5-flash for potentially lower cost/higher context
 const GEMINI_API_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const COVALENT_API_BASE_URL = 'https://api.covalenthq.com'; // Covalent Goldrush API Base URL
+const FLIPSIDE_API_BASE_URL = 'https://node-api.flipsidecrypto.com'; // Flipside ShroomDK API Base URL
 
 // --- Recommended Settings for API Calls to Gemini ---
 // Settings for converting NL to SQL
@@ -34,19 +33,17 @@ const SQL_GENERATION_CONFIG = {
   candidateCount: 1,
 };
 
-// Settings for mapping SQL to Covalent API calls
-const COVALENT_MAPPING_CONFIG = {
-    temperature: 0.1, // Keep low for predictable mapping
-    topP: 0.1,
-    candidateCount: 1,
-};
-
 // Settings for summarizing data
 const SUMMARIZATION_CONFIG = {
   temperature: 0.7, // Allow some creativity for summary
   topP: 0.9,
   candidateCount: 1
 };
+
+// --- Flipside Specific Configuration ---
+const FLIPSIDE_EXECUTION_POLL_INTERVAL = 3000; // Shorter poll interval for Flipside
+const FLIPSIDE_EXECUTION_MAX_WAIT_TIME = 120000; // Increased timeout for Flipside queries (2 minutes)
+
 
 // --- Helper Function for Making API Calls from the Backend ---
 // This function centralizes fetching logic and error handling.
@@ -69,7 +66,7 @@ async function fetchApi(url, options, serviceName) {
             }
 
             // Construct a detailed error message
-            const errorMessage = `Error ${response.status} from ${serviceName}: ${errorBody.error || errorBody.message || response.statusText || 'Unknown error'}`;
+            const errorMessage = `Error ${response.status} from ${serviceName}: ${errorBody.message || errorBody.error || response.statusText || 'Unknown error'}`;
             console.error(`API call failed to ${serviceName}:`, errorMessage);
 
             // Include status code and service name in the error object for specific handling
@@ -98,20 +95,22 @@ async function fetchApi(url, options, serviceName) {
 }
 
 
-// --- Core Workflow Functions (Called by the main handler) ---
+// --- Flipside Crypto (ShroomDK) Workflow Functions ---
 
 // Converts natural language question to SQL using Gemini API
+// (This function remains the same as before, generating general SQL)
 async function convertNLtoSQL(question) {
   const prompt = `
     You are an expert SQL writer specializing in blockchain data analysis.
     Your task is to convert the following natural language question into a concise SQL query.
     Focus on identifying the core data needed (e.g., balances, transactions, NFT data, volume).
-    Do NOT assume a specific database schema like Dune or Flipside. Just provide a general SQL representation of the data request.
-    Prioritize common blockchain data patterns (e.g., SELECT balance FROM accounts WHERE address = ..., SELECT amount FROM transfers WHERE token = ...).
+    Assume a standard blockchain data schema with tables like 'trades', 'transfers', 'balances', 'prices', etc.
+    Prioritize common blockchain data patterns (e.g., SELECT balance FROM balances WHERE address = ..., SELECT amount FROM transfers WHERE token = ...).
+    Include necessary filters like 'block_timestamp' or 'block_time' for time ranges if specified in the question. Use common table names like 'ethereum.core.fact_transactions', 'ethereum.core.fact_token_transfers', 'erc20.tokens' etc., which are common on platforms like Flipside.
 
     Instructions:
     1. Analyze the question to understand the data needed.
-    2. Construct a simple, general SQL query representing the data request.
+    2. Construct a simple, standard SQL query representing the data request, using common blockchain table names.
     3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
     4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
 
@@ -153,155 +152,157 @@ async function convertNLtoSQL(question) {
   return sqlQuery;
 }
 
-// Uses Gemini to map the generated SQL to a Covalent API call
-async function mapSQLtoCovalentApi(sqlQuery, originalQuestion) {
-    // NOTE: This prompt requires Gemini to understand Covalent's API structure.
-    // The accuracy of this mapping depends heavily on Gemini's training data
-    // and the specificity of the prompt. You might need to refine this prompt
-    // significantly based on testing.
-    const prompt = `
-    Analyze the following SQL query, which represents a user's blockchain data request.
-    Your goal is to identify the core data being requested (e.g., token balances, NFT transfers, transactions for an address, historical prices) and map it to the most relevant Covalent Goldrush API endpoint(s).
-    Provide the endpoint path and necessary parameters in a structured JSON format.
-    If the SQL query cannot be mapped to a suitable Covalent endpoint, return a specific JSON indicating this.
-
-    Covalent Goldrush API Documentation Overview: ${COVALENT_API_BASE_URL}/docs/api/
-
-    Common Covalent Endpoints (Examples - refer to full docs for details):
-    - Get token balances for address: /v1/{chain_id}/address/{address}/balances_v2/
-    - Get historical transactions for address: /v2/{chain_id}/address/{address}/transactions_v2/
-    - Get NFT transfers for contract: /v2/{chain_id}/nft/{contract_address}/token/{token_id}/transactions/ (for specific token ID)
-    - Get all NFT transfers for contract: /v2.{chain_id}/nft/{contract_address}/transactions/ (requires pagination handling)
-    - Get historical prices for token: /v1/pricing/historical_by_token_ids_v2/{chain_id}/latest/
-
-    Instructions:
-    1. Analyze the provided SQL query and the original natural language question.
-    2. Determine the most appropriate Covalent API endpoint(s) to fulfill the request.
-    3. Identify the required parameters (chain_id, address, contract_address, token_id, etc.) from the SQL or original question. Make reasonable assumptions if parameters are missing (e.g., assume Ethereum if chain is not specified, use a placeholder like 'USER_ADDRESS_PLACEHOLDER' if an address is needed but not provided).
-    4. Format the output as a JSON object with the following structure:
-       {
-         "endpoint": "string", // The Covalent API path (e.g., "/v1/1/address/0x.../balances_v2/")
-         "method": "GET" | "POST", // HTTP method (most Covalent endpoints are GET)
-         "parameters": { // Object containing key-value pairs for query parameters or path segments
-           "chain_id": "string", // e.g., "1", "137", "eth-mainnet", "matic-mainnet"
-           // ... other parameters like "address", "contract-address", "token-id", "quote-currency", "from", "to", "page-size", "page-number"
-         },
-         "requires_address": boolean, // Set to true if an address is mandatory but not in the query/question
-         "requires_contract": boolean, // Set to true if a contract address is mandatory but not in the query/question
-         "requires_token_id": boolean, // Set to true if a token ID is mandatory but not in the query/question
-         "description": "string" // Brief description of the intended Covalent call
-       }
-    5. If the SQL query cannot be mapped to a suitable Covalent endpoint, return:
-       {
-         "error": "Cannot map query to Covalent endpoint",
-         "description": "The request type is not directly supported by the available Covalent API endpoints."
-       }
-    6. Ensure the JSON is valid and contains ONLY the JSON object. Do not include markdown formatting (\`\`\`json) or any other text.
-
-    Original Question: "${originalQuestion}"
-    SQL Query: "${sqlQuery}"
-
-    Covalent API Mapping:
-    `;
-
+// Submits the SQL query to Flipside ShroomDK for execution
+async function submitFlipsideQuery(sqlQuery) {
     const options = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': GEMINI_API_KEY,
+            // API Key is passed in the body for ShroomDK v1
         },
         body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: COVALENT_MAPPING_CONFIG,
+            sql: sqlQuery,
+            apiKey: FLIPSIDE_API_KEY, // API Key included in the body for this endpoint
         }),
     };
+    // Endpoint for submitting query execution
+    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/exec`, options, 'Flipside (Submit Query)');
 
-    const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (SQL to Covalent Mapping)');
-
-    if (!data.candidates || data.candidates.length === 0 || !data.candidates[0].content || !data.candidates[0].content.parts || data.candidates[0].content.parts.length === 0) {
-        console.error("Invalid response structure from Gemini (Mapping):", data);
-        throw new Error('Received invalid response structure from Gemini (SQL to Covalent Mapping).');
+    // Flipside returns a query_id upon successful submission
+    if (!data || !data.query_id) {
+        console.error("Invalid response from Flipside submit:", data);
+        throw new Error("Failed to submit query to Flipside: Invalid response.");
     }
 
-    let jsonString = data.candidates[0].content.parts[0].text.trim();
+    console.log("Flipside Query Submitted, ID:", data.query_id);
+    return data.query_id;
+}
 
-     // Clean up potential markdown code blocks if the model adds them
-    jsonString = jsonString.replace(/^```json\s*/i, '').replace(/```$/, '').trim();
+// Gets the status of a Flipside query execution
+async function getFlipsideQueryStatus(queryId) {
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+             // API Key is passed in the body for ShroomDK v1 status check
+        },
+         // API Key included in the body for this endpoint
+        body: JSON.stringify({ apiKey: FLIPSIDE_API_KEY }), // Yes, body for GET status check in v1
+    };
+     // Endpoint for checking query status
+    const response = await fetch(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/status?query_id=${queryId}`, options);
+
+     if (!response.ok) {
+        console.error(`Error fetching Flipside status for ${queryId}: ${response.status} ${response.statusText}`);
+         let errorBody = await response.text();
+         console.error("Flipside Status Error Body:", errorBody);
+        throw new Error(`Failed to get Flipside execution status (${response.status})`);
+    }
+    const data = await response.json();
+    // Flipside status is in data.status
+    return data.status; // e.g., 'running', 'finished', 'failed'
+}
+
+
+// Waits for a Flipside query execution to complete, with timeout
+async function waitForFlipsideExecution(queryId) {
+  const startTime = Date.now();
+  console.log(`Waiting for Flipside execution ${queryId} to complete...`);
+
+  while (true) {
+    // Check for timeout
+    if (Date.now() - startTime > FLIPSIDE_EXECUTION_MAX_WAIT_TIME) {
+      console.error(`Flipside query execution ${queryId} timed out.`);
+      throw new Error(`Flipside query execution timed out after ${FLIPSIDE_EXECUTION_MAX_WAIT_TIME / 1000} seconds.`);
+    }
 
     try {
-        const mapping = JSON.parse(jsonString);
-        console.log("Covalent Mapping:", mapping);
-        if (mapping.error) {
-             throw new Error(`Mapping failed: ${mapping.description || mapping.error}`);
-        }
-         if (!mapping.endpoint || !mapping.method || !mapping.parameters) {
-             throw new Error("Mapping returned invalid structure.");
-         }
-        return mapping;
-    } catch (e) {
-        console.error("Failed to parse Gemini mapping response:", jsonString, e);
-        throw new Error(`Failed to interpret Covalent API mapping from Gemini. Response: ${jsonString.substring(0, 200)}...`);
+      const status = await getFlipsideQueryStatus(queryId);
+      console.log(`Flipside Execution ${queryId} status: ${status}`); // Log status for debugging
+
+      switch (status) {
+        case 'finished': // Flipside status for completion
+          console.log(`Flipside Execution ${queryId} completed successfully.`);
+          return true; // Success
+        case 'failed': // Flipside status for failure
+          console.error(`Flipside Execution ${queryId} failed.`);
+          // Attempt to get error details if possible (might require fetching results or checking logs)
+          throw new Error(`Flipside query execution failed.`); // Terminal state
+        case 'running': // Flipside status for in progress
+        case 'pending': // Flipside status for queued
+          // Continue polling
+          break; // Explicitly break the switch to continue the loop
+        default:
+          console.warn(`Unknown Flipside execution status encountered for ${queryId}: ${status}`);
+          // Decide how to handle unknown states.
+          throw new Error(`Encountered unknown Flipside execution status: ${status}`); // Treat as fatal for now
+      }
+    } catch (error) {
+       console.error(`Error during polling for Flipside execution ${queryId}:`, error);
+       // If getFlipsideQueryStatus throws, re-throw to break the wait loop
+       throw new Error(`Polling error for Flipside execution ${queryId}: ${error.message}`);
     }
+
+    // Wait before the next poll
+    await new Promise(resolve => setTimeout(resolve, FLIPSIDE_EXECUTION_POLL_INTERVAL));
+  }
 }
 
 
-// Executes the Covalent API call based on the mapping
-async function executeCovalentApiCall(mapping) {
-    let url = `${COVALENT_API_BASE_URL}${mapping.endpoint}`;
-    const options = {
-        method: mapping.method,
+// Gets the results of a completed Flipside query execution
+async function getFlipsideQueryResults(queryId) {
+   const options = {
+        method: 'GET',
         headers: {
-             // Covalent API key is passed as a query parameter
+            'Content-Type': 'application/json',
+             // API Key is passed in the body for ShroomDK v1 results fetch
         },
+         // API Key included in the body for this endpoint
+        body: JSON.stringify({ apiKey: FLIPSIDE_API_KEY }), // Yes, body for GET results fetch in v1
     };
+    // Endpoint for fetching query results
+    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/results?query_id=${queryId}`, options, 'Flipside (Get Results)');
 
-    // Add query parameters from the mapping, including the API key
-    const queryParams = new URLSearchParams(mapping.parameters);
-    queryParams.set('key', COVALENT_API_KEY); // Add API key securely
-
-    url = `${url}?${queryParams.toString()}`;
-
-    // NOTE: Covalent API has pagination for some endpoints (e.g., NFT transfers).
-    // This simple implementation doesn't handle pagination. For production,
-    // you might need to detect paginated endpoints and fetch multiple pages.
-
-    const data = await fetchApi(url, options, `Covalent (${mapping.description || mapping.endpoint})`);
-
-    // Covalent responses have a common structure, often with a 'data' property
-    if (data && data.data) {
-        console.log("Covalent Data Received:", data.data);
-        return data.data; // Return the relevant data part
+    // Flipside results are typically in data.results
+    if (data && data.results) {
+        console.log(`Successfully fetched ${data.results.length} rows from Flipside.`);
+        // Flipside results might include column names and row data separately or combined.
+        // For simplicity, we'll return the raw results structure.
+        // You might need to adjust how you pass this to Gemini if the format is complex.
+        return data.results;
     } else {
-        console.warn("Covalent response did not contain expected 'data' property:", data);
-        return data; // Return raw response if structure is unexpected
+        console.warn("Flipside response did not contain expected 'results' property:", data);
+        return []; // Return empty array if no results found
     }
 }
 
-// Summarizes the Covalent data using Gemini API
-async function summarizeCovalentData(covalentData, originalQuestion) {
-  let dataToSend = covalentData;
+
+// Summarizes the Flipside data using Gemini API
+async function summarizeFlipsideData(flipsideData, originalQuestion) {
+  let dataToSend = flipsideData;
   const MAX_DATA_LENGTH = 5000; // Adjust based on typical data size and token limits
-  const jsonData = JSON.stringify(covalentData);
+  const jsonData = JSON.stringify(flipsideData);
 
   // Simple sampling if data is too large for the prompt
   if (jsonData.length > MAX_DATA_LENGTH) {
     console.warn(`Data size (${jsonData.length}) exceeds limit (${MAX_DATA_LENGTH}). Summarizing sampled data.`);
-    // Sample the data - this might need refinement based on data structure
-    if (Array.isArray(covalentData.items)) {
-         dataToSend = { ...covalentData, items: covalentData.items.slice(0, Math.min(covalentData.items.length, 50)) };
+    // Sample the data - assuming flipsideData is an array of rows
+    if (Array.isArray(flipsideData)) {
+         dataToSend = flipsideData.slice(0, Math.min(flipsideData.length, 50));
     } else {
          dataToSend = jsonData.substring(0, MAX_DATA_LENGTH) + "..."; // Fallback for non-array data
     }
   }
 
-  if (!dataToSend || (Array.isArray(dataToSend.items) && dataToSend.items.length === 0)) {
-      return "The query ran successfully but returned no data from Covalent.";
+   if (!dataToSend || (Array.isArray(dataToSend) && dataToSend.length === 0)) {
+      return "The query ran successfully on Flipside but returned no data.";
   }
+
 
   const prompt = `
     You are an insightful data analyst specializing in blockchain data.
     A user asked the following question: "${originalQuestion}"
-    Data was retrieved from the Covalent Goldrush API. Here is the relevant data (potentially sampled if large):
+    Data was retrieved from a Flipside Crypto query execution. Here is the relevant data (potentially sampled if large):
     ${JSON.stringify(dataToSend, null, 2)}
 
     Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
@@ -325,7 +326,7 @@ async function summarizeCovalentData(covalentData, originalQuestion) {
 
   const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
+  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result[0].content.parts.length === 0) {
       console.error("Invalid response structure from Gemini (Summarization):", result);
       throw new Error('Received invalid response structure from Gemini during summarization.');
   }
@@ -381,8 +382,8 @@ exports.handler = async function(event, context) {
     console.log(`Processing question: "${question}"`);
 
     let sqlQuery = null;
-    let covalentMapping = null;
-    let covalentData = null;
+    let queryId = null;
+    let flipsideData = null;
     let finalInsight = "An unexpected error occurred."; // Default error message
     let statusCode = 500; // Default status code for errors
 
@@ -391,33 +392,23 @@ exports.handler = async function(event, context) {
         sqlQuery = await convertNLtoSQL(question);
         console.log("Step 1: NL to SQL completed.");
 
-        // 2. Map SQL to Covalent API call(s) using Gemini
-        covalentMapping = await mapSQLtoCovalentApi(sqlQuery, question);
-        console.log("Step 2: SQL to Covalent Mapping completed.");
-        console.log("Mapped API Call:", covalentMapping);
+        // 2. Submit the SQL query to Flipside
+        queryId = await submitFlipsideQuery(sqlQuery);
+        console.log("Step 2: Flipside Query Submitted.");
 
-        // --- Basic validation of mapping result ---
-        if (covalentMapping.requires_address || covalentMapping.requires_contract || covalentMapping.requires_token_id) {
-             // If Gemini indicates required parameters are missing, inform the user
-             let missingParams = [];
-             if(covalentMapping.requires_address) missingParams.push("a wallet address");
-             if(covalentMapping.requires_contract) missingParams.push("a contract address");
-             if(covalentMapping.requires_token_id) missingParams.push("a token ID");
+        // 3. Wait for Flipside execution to complete
+        await waitForFlipsideExecution(queryId);
+        console.log("Step 3: Flipside Execution Completed.");
 
-             finalInsight = `The Oracle needs more information to answer that question. Please provide ${missingParams.join(' and ')}.`;
-             statusCode = 200; // Return success status as we're providing information
+        // 4. Get the results from Flipside
+        flipsideData = await getFlipsideQueryResults(queryId);
+        console.log("Step 4: Flipside Results Fetched.");
 
-        } else {
-            // 3. Execute the Covalent API call
-            covalentData = await executeCovalentApiCall(covalentMapping);
-            console.log("Step 3: Covalent API Call executed.");
+        // 5. Summarize Flipside Data using Gemini
+        finalInsight = await summarizeFlipsideData(flipsideData, question);
+        console.log("Step 5: Summarization Completed.");
 
-            // 4. Summarize Covalent Data using Gemini
-            finalInsight = await summarizeCovalentData(covalentData, question);
-            console.log("Step 4: Summarization Completed.");
-            statusCode = 200; // Success
-        }
-
+        statusCode = 200; // Success
 
     } catch (error) {
         // --- Handle Errors ---
@@ -437,8 +428,8 @@ exports.handler = async function(event, context) {
             insight: finalInsight,
             // Optionally include intermediate steps for debugging if needed
             // sql: sqlQuery,
-            // mapping: covalentMapping,
-            // rawCovalentData: covalentData // Be cautious with large data
+            // queryId: queryId,
+            // rawFlipsideData: flipsideData // Be cautious with large data
         }),
     };
 };
