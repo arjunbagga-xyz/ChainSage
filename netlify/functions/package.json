@@ -5,6 +5,5 @@
   "main": "chainsage-proxy.js",
   "dependencies": {
     "@flipsidecrypto/sdk": "^1.0.0"
-    // Check Flipside docs for the latest SDK version if needed
   }
 }
