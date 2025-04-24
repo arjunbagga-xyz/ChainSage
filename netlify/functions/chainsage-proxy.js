@@ -194,7 +194,7 @@ async function submitFlipsideQuery(sqlQuery) {
                 "sql": sqlQuery,
                 // Add required parameters for createQueryRun as indicated by the error
                 "maxAgeMinutes": 10, // Example: Cache results for 10 minutes
-                "dataSource": "snowflake", // Example: Specify data source
+                "dataSource": "snowflake-default", // Example: Specify data source
                 "dataProvider": "flipside" // Example: Specify data provider
             }
         ],
