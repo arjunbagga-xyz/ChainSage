@@ -1,7 +1,7 @@
 // This Netlify Serverless Function acts as a backend proxy
-// to securely handle API calls to Gemini and Flipside Crypto (ShroomDK).
+// to securely handle API calls to Gemini and Flipside Crypto (V2 JSON-RPC).
 // It receives a question from the frontend, uses Gemini to
-// generate SQL, executes the SQL on Flipside, uses Gemini to summarize,
+// generate SQL, executes the SQL on Flipside via JSON-RPC, uses Gemini to summarize,
 // and returns the summary.
 
 // Netlify's Node.js environment supports native fetch
@@ -23,7 +23,8 @@ if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
 // --- API Configuration ---
 const GEMINI_MODEL = 'gemini-2.0-flash'; // Or gemini-1.5-flash for potentially lower cost/higher context
 const GEMINI_API_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const FLIPSIDE_API_BASE_URL = 'https://api-v2.flipsidecrypto.xyz'; // Flipside ShroomDK API Base URL
+// Correct Flipside V2 JSON-RPC API Endpoint
+const FLIPSIDE_API_ENDPOINT = 'https://api-v2.flipsidecrypto.xyz/json-rpc';
 
 // --- Recommended Settings for API Calls to Gemini ---
 // Settings for converting NL to SQL
@@ -43,7 +44,7 @@ const SUMMARIZATION_CONFIG = {
 // --- Flipside Specific Configuration ---
 const FLIPSIDE_EXECUTION_POLL_INTERVAL = 3000; // Shorter poll interval for Flipside
 const FLIPSIDE_EXECUTION_MAX_WAIT_TIME = 120000; // Increased timeout for Flipside queries (2 minutes)
-
+const FLIPSIDE_RESULTS_PAGE_SIZE = 1000; // How many rows to fetch per results page
 
 // --- Helper Function for Making API Calls from the Backend ---
 // This function centralizes fetching logic and error handling.
@@ -98,12 +99,23 @@ async function fetchApi(url, options, serviceName) {
         // If response is OK, parse the already read text as JSON
         const data = JSON.parse(responseBodyText);
         console.log(`Successfully called ${serviceName}`);
-        return data;
+
+        // Check for JSON-RPC specific errors in the response body
+        if (data.error) {
+            const jsonRpcError = new Error(`JSON-RPC Error ${data.error.code}: ${data.error.message}`);
+            jsonRpcError.code = data.error.code;
+            jsonRpcError.data = data.error.data; // Include any additional error data
+            jsonRpcError.service = serviceName; // Add service context
+            console.error(`${serviceName} JSON-RPC Error:`, jsonRpcError);
+            throw jsonRpcError;
+        }
+
+        return data; // Return the full JSON-RPC response object
 
     } catch (error) {
         console.error(`Fetch error during call to ${serviceName}:`, error);
         // Re-throw the error with context and original error properties
-        if (error.service) { // If it's an API error we already processed
+        if (error.service) { // If it's an API error we already processed (HTTP or JSON-RPC)
              throw error;
         }
         // Otherwise, wrap a general fetch error
@@ -115,10 +127,10 @@ async function fetchApi(url, options, serviceName) {
 }
 
 
-// --- Flipside Crypto (ShroomDK) Workflow Functions ---
+// --- Flipside Crypto (V2 JSON-RPC) Workflow Functions ---
 
 // Converts natural language question to SQL using Gemini API
-// (This function remains the same as before, generating general SQL)
+// (This function remains the same, generating general SQL)
 async function convertNLtoSQL(question) {
   const prompt = `
     You are an expert SQL writer specializing in blockchain data analysis.
@@ -172,87 +184,117 @@ async function convertNLtoSQL(question) {
   return sqlQuery;
 }
 
-// Submits the SQL query to Flipside ShroomDK for execution
+// Submits the SQL query to Flipside V2 JSON-RPC for execution
 async function submitFlipsideQuery(sqlQuery) {
+    const jsonRpcPayload = {
+        "jsonrpc": "2.0",
+        "method": "createQueryRun", // JSON-RPC method to create a query run
+        "params": [
+            {
+                "sql": sqlQuery
+            }
+        ],
+        "id": 1 // Request ID
+    };
+
     const options = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'x-api-key': FLIPSIDE_API_KEY // Correct header for ShroomDK v2 API key
-            // API Key is NOT passed in the body for ShroomDK v2
+            'x-api-key': FLIPSIDE_API_KEY // API Key in header for V2
         },
-        body: JSON.stringify({
-            sql: sqlQuery
-        }),
+        body: JSON.stringify(jsonRpcPayload),
     };
-    // Endpoint for submitting query execution (using v2 endpoint)
-    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/exec`, options, 'Flipside (Submit Query)');
 
-    // Flipside returns a query_id upon successful submission
-    if (!data || !data.query_id) {
+    // Use the V2 JSON-RPC endpoint
+    const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Submit Query)');
+
+    // Flipside V2 returns the queryRunId in the 'result' property
+    if (!data || !data.result || !data.result.queryRunId) {
         console.error("Invalid response from Flipside submit:", data);
-        throw new Error("Failed to submit query to Flipside: Invalid response.");
+        throw new Error("Failed to submit query to Flipside: Invalid response structure.");
     }
 
-    console.log("Flipside Query Submitted, ID:", data.query_id);
-    return data.query_id;
+    console.log("Flipside Query Submitted, Query Run ID:", data.result.queryRunId);
+    return data.result.queryRunId;
 }
 
-// Gets the status of a Flipside query execution
-async function getFlipsideQueryStatus(queryId) {
-    const options = {
-        method: 'GET',
-        headers: {
-            'x-api-key': FLIPSIDE_API_KEY // Correct header for ShroomDK v2 API key
-            // API Key is NOT passed in the body for ShroomDK v2 status check
-        },
-        // No body for GET request in ShroomDK v2
+// Gets the status of a Flipside V2 JSON-RPC query execution
+async function getFlipsideQueryStatus(queryRunId) {
+    const jsonRpcPayload = {
+        "jsonrpc": "2.0",
+        "method": "getQueryRun", // JSON-RPC method to get query run status
+        "params": [
+            {
+                "queryRunId": queryRunId
+            }
+        ],
+        "id": 1 // Request ID
     };
-     // Endpoint for checking query status (using v2 endpoint)
-    const response = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/status?query_id=${queryId}`, options, 'Flipside (Get Status)');
 
-    // Flipside status is in data.status
-    return data.status; // e.g., 'running', 'finished', 'failed'
+    const options = {
+        method: 'POST', // JSON-RPC calls are typically POST
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': FLIPSIDE_API_KEY // API Key in header for V2
+        },
+        body: JSON.stringify(jsonRpcPayload),
+    };
+
+    // Use the V2 JSON-RPC endpoint
+    const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Get Status)');
+
+    // Flipside V2 returns status in data.result.status
+    if (!data || !data.result || !data.result.status) {
+        console.error("Invalid response from Flipside status check:", data);
+        throw new Error("Failed to get query status from Flipside: Invalid response structure.");
+    }
+
+    return data.result.status; // e.g., 'RUNNING', 'COMPLETED', 'FAILED' (Note V2 status values might be uppercase)
 }
 
 
-// Waits for a Flipside query execution to complete, with timeout
-async function waitForFlipsideExecution(queryId) {
+// Waits for a Flipside V2 JSON-RPC query execution to complete, with timeout
+async function waitForFlipsideExecution(queryRunId) {
   const startTime = Date.now();
-  console.log(`Waiting for Flipside execution ${queryId} to complete...`);
+  console.log(`Waiting for Flipside execution ${queryRunId} to complete...`);
 
   while (true) {
     // Check for timeout
     if (Date.now() - startTime > FLIPSIDE_EXECUTION_MAX_WAIT_TIME) {
-      console.error(`Flipside query execution ${queryId} timed out.`);
+      console.error(`Flipside query execution ${queryRunId} timed out.`);
       throw new Error(`Flipside query execution timed out after ${FLIPSIDE_EXECUTION_MAX_WAIT_TIME / 1000} seconds.`);
     }
 
     try {
-      const status = await getFlipsideQueryStatus(queryId);
-      console.log(`Flipside Execution ${queryId} status: ${status}`); // Log status for debugging
+      const status = await getFlipsideQueryStatus(queryRunId);
+      console.log(`Flipside Execution ${queryRunId} status: ${status}`); // Log status for debugging
 
       switch (status) {
-        case 'finished': // Flipside status for completion
-          console.log(`Flipside Execution ${queryId} completed successfully.`);
+        case 'COMPLETED': // Flipside V2 status for completion
+          console.log(`Flipside Execution ${queryRunId} completed successfully.`);
           return true; // Success
-        case 'failed': // Flipside status for failure
-          console.error(`Flipside Execution ${queryId} failed.`);
-          // Attempt to get error details if possible (might require fetching results or checking logs)
+        case 'FAILED': // Flipside V2 status for failure
+          console.error(`Flipside Execution ${queryRunId} failed.`);
+          // You might want to fetch results here to get error details if available
           throw new Error(`Flipside query execution failed.`); // Terminal state
-        case 'running': // Flipside status for in progress
-        case 'pending': // Flipside status for queued
+        case 'CANCELLED': // Handle cancelled state as well
+            console.error(`Flipside Execution ${queryRunId} was cancelled.`);
+            throw new Error(`Flipside query execution was cancelled.`);
+        case 'RUNNING': // Flipside V2 status for in progress
+        case 'PENDING': // Flipside V2 status for queued
+        case 'CANCELLING': // Flipside V2 status for cancelling
           // Continue polling
           break; // Explicitly break the switch to continue the loop
         default:
-          console.warn(`Unknown Flipside execution status encountered for ${queryId}: ${status}`);
+          console.warn(`Unknown Flipside execution status encountered for ${queryRunId}: ${status}`);
           // Decide how to handle unknown states.
           throw new Error(`Encountered unknown Flipside execution status: ${status}`); // Treat as fatal for now
       }
     } catch (error) {
-       console.error(`Error during polling for Flipside execution ${queryId}:`, error);
+       console.error(`Error during polling for Flipside execution ${queryRunId}:`, error);
        // If getFlipsideQueryStatus throws, re-throw to break the wait loop
-       throw new Error(`Polling error for Flipside execution ${queryId}: ${error.message}`);
+       throw new Error(`Polling error for Flipside execution ${queryRunId}: ${error.message}`);
     }
 
     // Wait before the next poll
@@ -261,90 +303,115 @@ async function waitForFlipsideExecution(queryId) {
 }
 
 
-// Gets the results of a completed Flipside query execution
-async function getFlipsideQueryResults(queryId) {
-   const options = {
-        method: 'GET',
-        headers: {
-            'x-api-key': FLIPSIDE_API_KEY // Correct header for ShroomDK v2 API key
-            // API Key is NOT passed in the body for ShroomDK v2 results fetch
-        },
-        // No body for GET request in ShroomDK v2
+// Gets the results of a completed Flipside V2 JSON-RPC query execution
+async function getFlipsideQueryResults(queryRunId) {
+    // Note: Flipside V2 results might require pagination if the result set is large.
+    // This implementation fetches the first page. For large results, you'd need
+    // to iterate through pages using the 'page' parameter in the JSON-RPC payload.
+    const jsonRpcPayload = {
+        "jsonrpc": "2.0",
+        "method": "getQueryRunResults", // JSON-RPC method to get results
+        "params": [
+            {
+                "queryRunId": queryRunId,
+                "format": "json", // Request JSON format for easier processing
+                "page": {
+                    "number": 1, // Fetch the first page
+                    "size": FLIPSIDE_RESULTS_PAGE_SIZE // Use defined page size
+                }
+            }
+        ],
+        "id": 1 // Request ID
     };
-    // Endpoint for fetching query results (using v2 endpoint)
-    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/results?query_id=${queryId}`, options, 'Flipside (Get Results)');
 
-    // Flipside results are typically in data.results
-    if (data && data.results) {
-        console.log(`Successfully fetched ${data.results.length} rows from Flipside.`);
-        // Flipside results might include column names and row data separately or combined.
-        // For simplicity, we'll return the raw results structure.
-        // You might need to adjust how you pass this to Gemini if the format is complex.
-        return data.results;
+   const options = {
+        method: 'POST', // JSON-RPC calls are typically POST
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': FLIPSIDE_API_KEY // API Key in header for V2
+        },
+        body: JSON.stringify(jsonRpcPayload),
+    };
+
+    // Use the V2 JSON-RPC endpoint
+    const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Get Results)');
+
+    // Flipside V2 returns results in data.result.rows and columnNames
+    if (data && data.result && data.result.rows) {
+        console.log(`Successfully fetched ${data.result.rows.length} rows from Flipside.`);
+        // Return an object containing both column names and rows for better context for summarization
+        return {
+            columnNames: data.result.columnNames,
+            rows: data.result.rows
+        };
     } else {
-        console.warn("Flipside response did not contain expected 'results' property:", data);
-        return []; // Return empty array if no results found
+        console.warn("Flipside response did not contain expected 'result' or 'rows' property:", data);
+        return { columnNames: [], rows: [] }; // Return empty structure if no results found
     }
 }
 
 
 // Summarizes the Flipside data using Gemini API
 async function summarizeFlipsideData(flipsideData, originalQuestion) {
-  let dataToSend = flipsideData;
-  const MAX_DATA_LENGTH = 5000; // Adjust based on typical data size and token limits
-  const jsonData = JSON.stringify(flipsideData);
+    // Prepare data for Gemini, including column names and rows
+  let dataToSend = flipsideData;
+  const MAX_DATA_LENGTH = 5000; // Adjust based on typical data size and token limits
+  const jsonData = JSON.stringify(flipsideData);
 
-  // Simple sampling if data is too large for the prompt
-  if (jsonData.length > MAX_DATA_LENGTH) {
-    console.warn(`Data size (${jsonData.length}) exceeds limit (${MAX_DATA_LENGTH}). Summarizing sampled data.`);
-    // Sample the data - assuming flipsideData is an array of rows
-    if (Array.isArray(flipsideData)) {
-         dataToSend = flipsideData.slice(0, Math.min(flipsideData.length, 50));
-    } else {
-         dataToSend = jsonData.substring(0, MAX_DATA_LENGTH) + "..."; // Fallback for non-array data
-    }
-  }
+  // Simple sampling if data is too large for the prompt
+  if (jsonData.length > MAX_DATA_LENGTH) {
+    console.warn(`Data size (${jsonData.length}) exceeds limit (${MAX_DATA_LENGTH}). Summarizing sampled data.`);
+    // Sample the rows, keep column names
+    if (Array.isArray(flipsideData.rows)) {
+         dataToSend = {
+             columnNames: flipsideData.columnNames,
+             rows: flipsideData.rows.slice(0, Math.min(flipsideData.rows.length, 50))
+         };
+    } else {
+         dataToSend = jsonData.substring(0, MAX_DATA_LENGTH) + "..."; // Fallback for non-array data
+    }
+  }
 
-   if (!dataToSend || (Array.isArray(dataToSend) && dataToSend.length === 0)) {
-      return "The query ran successfully on Flipside but returned no data.";
-  }
+   if (!dataToSend || (Array.isArray(dataToSend.rows) && dataToSend.rows.length === 0)) {
+      return "The query ran successfully on Flipside but returned no data.";
+  }
 
 
-  const prompt = `
-    You are an insightful data analyst specializing in blockchain data.
-    A user asked the following question: "${originalQuestion}"
-    Data was retrieved from a Flipside Crypto query execution. Here is the relevant data (potentially sampled if large):
-    ${JSON.stringify(dataToSend, null, 2)}
+  const prompt = `
+    You are an insightful data analyst specializing in blockchain data.
+    A user asked the following question: "${originalQuestion}"
+    Data was retrieved from a Flipside Crypto query execution. Here is the relevant data (potentially sampled if large), including column names and rows:
+    ${JSON.stringify(dataToSend, null, 2)}
 
-    Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
-    Focus on answering the user's original question using the data provided.
-    If the data doesn't directly answer the question, state that and summarize what the data DOES show.
-    Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
-    If the data indicates an error or no results, state that clearly.
-  `;
+    Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
+    Focus on answering the user's original question using the data provided.
+    If the data doesn't directly answer the question, state that and summarize what the data DOES show.
+    Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
+    If the data indicates an error or no results, state that clearly.
+  `;
 
-  const options = {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_API_KEY,
-      },
-      body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: SUMMARIZATION_CONFIG
-      }),
-  };
+  const options = {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': GEMINI_API_KEY,
+      },
+      body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: SUMMARIZATION_CONFIG
+      }),
+  };
 
-  const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
+  const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
-      console.error("Invalid response structure from Gemini (Summarization):", result);
-      throw new Error('Received invalid response structure from Gemini during summarization.');
-  }
+  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
+      console.error("Invalid response structure from Gemini (Summarization):", result);
+      throw new Error('Received invalid response structure from Gemini during summarization.');
+  }
 
-  const insight = result.candidates[0].content.parts[0].text.trim();
-  console.log("Generated Insight:", insight);
-  return insight;
+  const insight = result.candidates[0].content.parts[0].text.trim();
+  console.log("Generated Insight:", insight);
+  return insight;
 }
 
 
@@ -393,7 +460,7 @@ exports.handler = async function(event, context) {
     console.log(`Processing question: "${question}"`);
 
     let sqlQuery = null;
-    let queryId = null;
+    let queryRunId = null; // Renamed from queryId to match V2 terminology
     let flipsideData = null;
     let finalInsight = "An unexpected error occurred."; // Default error message
     let statusCode = 500; // Default status code for errors
@@ -403,16 +470,16 @@ exports.handler = async function(event, context) {
         sqlQuery = await convertNLtoSQL(question);
         console.log("Step 1: NL to SQL completed.");
 
-        // 2. Submit the SQL query to Flipside
-        queryId = await submitFlipsideQuery(sqlQuery);
+        // 2. Submit the SQL query to Flipside V2 JSON-RPC
+        queryRunId = await submitFlipsideQuery(sqlQuery);
         console.log("Step 2: Flipside Query Submitted.");
 
         // 3. Wait for Flipside execution to complete
-        await waitForFlipsideExecution(queryId);
+        await waitForFlipsideExecution(queryRunId);
         console.log("Step 3: Flipside Execution Completed.");
 
-        // 4. Get the results from Flipside
-        flipsideData = await getFlipsideQueryResults(queryId);
+        // 4. Get the results from Flipside V2 JSON-RPC
+        flipsideData = await getFlipsideQueryResults(queryRunId);
         console.log("Step 4: Flipside Results Fetched.");
 
         // 5. Summarize Flipside Data using Gemini
@@ -439,7 +506,7 @@ exports.handler = async function(event, context) {
             insight: finalInsight,
             // Optionally include intermediate steps for debugging if needed
             // sql: sqlQuery,
-            // queryId: queryId,
+            // queryRunId: queryRunId,
             // rawFlipsideData: flipsideData // Be cautious with large data
         }),
     };
