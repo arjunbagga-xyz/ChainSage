@@ -1,0 +1,20 @@
+# Basic Netlify configuration file
+
+[build]
+  # Directory where Netlify should look for functions
+  # This tells Netlify where your serverless functions are located.
+  functions = "netlify/functions"
+
+  # Optional: Directory that contains the deploy-ready HTML files and assets
+  # If your index.html is in the root, you can leave this commented or set to "."
+  # publish = "."
+
+  # Optional: The command to run to build your site
+  # For a simple static site with functions, this might not be needed
+  # as Netlify automatically installs dependencies from the root package.json
+  # and bundles functions in the specified directory.
+  # command = "npm install" # Example if you needed a specific build step
+
+# You can add other configurations here, like environment variables
+# (though setting them in the UI is often easier for secrets)
+# or redirects.
