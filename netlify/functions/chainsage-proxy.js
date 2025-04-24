@@ -11,7 +11,7 @@
 // These variables are set securely in your Netlify site settings.
 // The names 'GEMINI_API' and 'FLIPSIDE_API' should match the names you set in Netlify.
 const GEMINI_API_KEY = process.env.GEMINI_API;
-const FLIPSIDE_API_KEY = process.env.FLIPSIDE_API; // Renamed from COVALENT_API
+const FLIPSIDE_API_KEY = process.env.FLIPSIDE_API;
 
 // Basic validation to ensure keys are set during deployment/runtime
 if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
@@ -51,7 +51,20 @@ async function fetchApi(url, options, serviceName) {
     let response;
     try {
         console.log(`Calling external API: ${serviceName} - ${url}`);
-        response = await fetch(url, options);
+
+        // Add a default User-Agent header
+        const defaultHeaders = {
+            'User-Agent': 'ChainSage-Netlify-Function/1.0', // Identify your application
+            ...options.headers // Merge with any specific headers provided
+        };
+
+        const fetchOptions = {
+            ...options,
+            headers: defaultHeaders
+        };
+
+
+        response = await fetch(url, fetchOptions);
 
         if (!response.ok) {
             let errorBody = 'Could not parse error response.';
@@ -113,7 +126,6 @@ async function convertNLtoSQL(question) {
     2. Construct a simple, standard SQL query representing the data request, using common blockchain table names.
     3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
     4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
-    5. The output query should be in accordance with flipside database API
 
     Natural Language Question:
     "${question}"
@@ -327,7 +339,7 @@ async function summarizeFlipsideData(flipsideData, originalQuestion) {
 
   const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result[0].content.parts.length === 0) {
+  if (!result.candidates || result.candidates.length === 0 || !result[0].content || !result[0].content.parts || result[0].content.parts.length === 0) {
       console.error("Invalid response structure from Gemini (Summarization):", result);
       throw new Error('Received invalid response structure from Gemini during summarization.');
   }
