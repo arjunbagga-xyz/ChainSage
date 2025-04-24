@@ -1,11 +1,11 @@
 // This Netlify Serverless Function acts as a backend proxy
-// to securely handle API calls to Gemini and Flipside Crypto using their SDK.
+// to securely handle API calls to Gemini and Flipside Crypto (ShroomDK).
 // It receives a question from the frontend, uses Gemini to
-// generate SQL, executes the SQL on Flipside via the SDK, uses Gemini to summarize,
+// generate SQL, executes the SQL on Flipside, uses Gemini to summarize,
 // and returns the summary.
 
-// Import the Flipside SDK
-const { Flipside } = require("@flipsidecrypto/sdk");
+// Netlify's Node.js environment supports native fetch
+// const fetch = require('node-fetch'); // Uncomment if using node-fetch locally or on older Node
 
 // Retrieve API keys from Netlify Environment Variables.
 // These variables are set securely in your Netlify site settings.
@@ -20,16 +20,10 @@ if (!GEMINI_API_KEY || !FLIPSIDE_API_KEY) {
     // but for a serverless function, logging helps diagnose setup issues.
 }
 
-// Initialize Flipside SDK with the API key and the v2 API endpoint
-const flipside = new Flipside(
-    FLIPSIDE_API_KEY, // Pass the API key here
-    "https://api-v2.flipsidecrypto.xyz" // Use the v2 API endpoint
-);
-
-
 // --- API Configuration ---
 const GEMINI_MODEL = 'gemini-2.0-flash'; // Or gemini-1.5-flash for potentially lower cost/higher context
 const GEMINI_API_BASE_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const FLIPSIDE_API_BASE_URL = 'https://api-v2.flipsidecrypto.xyz'; // Flipside ShroomDK API Base URL
 
 // --- Recommended Settings for API Calls to Gemini ---
 // Settings for converting NL to SQL
@@ -46,14 +40,19 @@ const SUMMARIZATION_CONFIG = {
   candidateCount: 1
 };
 
-// --- Helper Function for Making API Calls from the Backend (Used only for Gemini now) ---
+// --- Flipside Specific Configuration ---
+const FLIPSIDE_EXECUTION_POLL_INTERVAL = 3000; // Shorter poll interval for Flipside
+const FLIPSIDE_EXECUTION_MAX_WAIT_TIME = 120000; // Increased timeout for Flipside queries (2 minutes)
+
+
+// --- Helper Function for Making API Calls from the Backend ---
 // This function centralizes fetching logic and error handling.
 async function fetchApi(url, options, serviceName) {
     let response;
     try {
         console.log(`Calling external API: ${serviceName} - ${url}`);
 
-        // Add a default User-Agent header (good practice)
+        // Add a default User-Agent header
         const defaultHeaders = {
             'User-Agent': 'ChainSage-Netlify-Function/1.0', // Identify your application
             ...options.headers // Merge with any specific headers provided
@@ -63,6 +62,7 @@ async function fetchApi(url, options, serviceName) {
             ...options,
             headers: defaultHeaders
         };
+
 
         response = await fetch(url, fetchOptions);
 
@@ -108,10 +108,10 @@ async function fetchApi(url, options, serviceName) {
 }
 
 
-// --- Core Workflow Functions ---
+// --- Flipside Crypto (ShroomDK) Workflow Functions ---
 
 // Converts natural language question to SQL using Gemini API
-// (This function remains the same, generating general SQL)
+// (This function remains the same as before, generating general SQL)
 async function convertNLtoSQL(question) {
   const prompt = `
     You are an expert SQL writer specializing in blockchain data analysis.
@@ -165,30 +165,132 @@ async function convertNLtoSQL(question) {
   return sqlQuery;
 }
 
+// Submits the SQL query to Flipside ShroomDK for execution
+async function submitFlipsideQuery(sqlQuery) {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // API Key is passed in the body for ShroomDK v1
+        },
+        body: JSON.stringify({
+            sql: sqlQuery,
+            apiKey: FLIPSIDE_API_KEY, // API Key included in the body for this endpoint
+        }),
+    };
+    // Endpoint for submitting query execution
+    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/exec`, options, 'Flipside (Submit Query)');
 
-// Executes the SQL query using the Flipside SDK
-async function executeFlipsideQueryWithSDK(sqlQuery) {
-    console.log(`Executing Flipside query via SDK: ${sqlQuery}`);
+    // Flipside returns a query_id upon successful submission
+    if (!data || !data.query_id) {
+        console.error("Invalid response from Flipside submit:", data);
+        throw new Error("Failed to submit query to Flipside: Invalid response.");
+    }
+
+    console.log("Flipside Query Submitted, ID:", data.query_id);
+    return data.query_id;
+}
+
+// Gets the status of a Flipside query execution
+async function getFlipsideQueryStatus(queryId) {
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+             // API Key is passed in the body for ShroomDK v1 status check
+        },
+         // API Key included in the body for this endpoint
+        body: JSON.stringify({ apiKey: FLIPSIDE_API_KEY }), // Yes, body for GET status check in v1
+    };
+     // Endpoint for checking query status
+    const response = await fetch(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/status?query_id=${queryId}`, options);
+
+     if (!response.ok) {
+        console.error(`Error fetching Flipside status for ${queryId}: ${response.status} ${response.statusText}`);
+         let errorBody = await response.text();
+         console.error("Flipside Status Error Body:", errorBody);
+        throw new Error(`Failed to get Flipside execution status (${response.status})`);
+    }
+    const data = await response.json();
+    // Flipside status is in data.status
+    return data.status; // e.g., 'running', 'finished', 'failed'
+}
+
+
+// Waits for a Flipside query execution to complete, with timeout
+async function waitForFlipsideExecution(queryId) {
+  const startTime = Date.now();
+  console.log(`Waiting for Flipside execution ${queryId} to complete...`);
+
+  while (true) {
+    // Check for timeout
+    if (Date.now() - startTime > FLIPSIDE_EXECUTION_MAX_WAIT_TIME) {
+      console.error(`Flipside query execution ${queryId} timed out.`);
+      throw new Error(`Flipside query execution timed out after ${FLIPSIDE_EXECUTION_MAX_WAIT_TIME / 1000} seconds.`);
+    }
+
     try {
-        // Use the SDK's query.run method
-        const queryResultSet = await flipside.query.run({ sql: sqlQuery });
+      const status = await getFlipsideQueryStatus(queryId);
+      console.log(`Flipside Execution ${queryId} status: ${status}`); // Log status for debugging
 
-        // The result set contains metadata and the actual data rows
-        console.log("Flipside SDK Query Executed. Status:", queryResultSet.status);
-        console.log("Flipside SDK Query Result Count:", queryResultSet.records ? queryResultSet.records.length : 0);
-
-        // Return the records (data rows)
-        return queryResultSet.records || []; // Return empty array if no records
+      switch (status) {
+        case 'finished': // Flipside status for completion
+          console.log(`Flipside Execution ${queryId} completed successfully.`);
+          return true; // Success
+        case 'failed': // Flipside status for failure
+          console.error(`Flipside Execution ${queryId} failed.`);
+          // Attempt to get error details if possible (might require fetching results or checking logs)
+          throw new Error(`Flipside query execution failed.`); // Terminal state
+        case 'running': // Flipside status for in progress
+        case 'pending': // Flipside status for queued
+          // Continue polling
+          break; // Explicitly break the switch to continue the loop
+        default:
+          console.warn(`Unknown Flipside execution status encountered for ${queryId}: ${status}`);
+          // Decide how to handle unknown states.
+          throw new Error(`Encountered unknown Flipside execution status: ${status}`); // Treat as fatal for now
+      }
     } catch (error) {
-        console.error('Error executing Flipside query via SDK:', error);
-        // The SDK throws errors for API issues, query failures, etc.
-        throw new Error(`Flipside SDK query execution failed: ${error.message}`);
+       console.error(`Error during polling for Flipside execution ${queryId}:`, error);
+       // If getFlipsideQueryStatus throws, re-throw to break the wait loop
+       throw new Error(`Polling error for Flipside execution ${queryId}: ${error.message}`);
+    }
+
+    // Wait before the next poll
+    await new Promise(resolve => setTimeout(resolve, FLIPSIDE_EXECUTION_POLL_INTERVAL));
+  }
+}
+
+
+// Gets the results of a completed Flipside query execution
+async function getFlipsideQueryResults(queryId) {
+   const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+             // API Key is passed in the body for ShroomDK v1 results fetch
+        },
+         // API Key included in the body for this endpoint
+        body: JSON.stringify({ apiKey: FLIPSIDE_API_KEY }), // Yes, body for GET results fetch in v1
+    };
+    // Endpoint for fetching query results
+    const data = await fetchApi(`${FLIPSIDE_API_BASE_URL}/shroomdk/v1/results?query_id=${queryId}`, options, 'Flipside (Get Results)');
+
+    // Flipside results are typically in data.results
+    if (data && data.results) {
+        console.log(`Successfully fetched ${data.results.length} rows from Flipside.`);
+        // Flipside results might include column names and row data separately or combined.
+        // For simplicity, we'll return the raw results structure.
+        // You might need to adjust how you pass this to Gemini if the format is complex.
+        return data.results;
+    } else {
+        console.warn("Flipside response did not contain expected 'results' property:", data);
+        return []; // Return empty array if no results found
     }
 }
 
 
 // Summarizes the Flipside data using Gemini API
-// This function is similar, but takes data from the SDK result
 async function summarizeFlipsideData(flipsideData, originalQuestion) {
   let dataToSend = flipsideData;
   const MAX_DATA_LENGTH = 5000; // Adjust based on typical data size and token limits
@@ -197,7 +299,7 @@ async function summarizeFlipsideData(flipsideData, originalQuestion) {
   // Simple sampling if data is too large for the prompt
   if (jsonData.length > MAX_DATA_LENGTH) {
     console.warn(`Data size (${jsonData.length}) exceeds limit (${MAX_DATA_LENGTH}). Summarizing sampled data.`);
-    // Sample the data - assuming flipsideData is an array of rows from SDK
+    // Sample the data - assuming flipsideData is an array of rows
     if (Array.isArray(flipsideData)) {
          dataToSend = flipsideData.slice(0, Math.min(flipsideData.length, 50));
     } else {
@@ -237,7 +339,7 @@ async function summarizeFlipsideData(flipsideData, originalQuestion) {
 
   const result = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (Summarization)');
 
-  if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts || result.candidates[0].content.parts.length === 0) {
+  if (!result.candidates || result.candidates.length === 0 || !result[0].content || !result[0].content.parts || result[0].content.parts.length === 0) {
       console.error("Invalid response structure from Gemini (Summarization):", result);
       throw new Error('Received invalid response structure from Gemini during summarization.');
   }
@@ -293,6 +395,7 @@ exports.handler = async function(event, context) {
     console.log(`Processing question: "${question}"`);
 
     let sqlQuery = null;
+    let queryId = null;
     let flipsideData = null;
     let finalInsight = "An unexpected error occurred."; // Default error message
     let statusCode = 500; // Default status code for errors
@@ -302,10 +405,17 @@ exports.handler = async function(event, context) {
         sqlQuery = await convertNLtoSQL(question);
         console.log("Step 1: NL to SQL completed.");
 
-        // 2. Execute the SQL query using the Flipside SDK
-        // The SDK handles submission, polling, and fetching results internally
-        flipsideData = await executeFlipsideQueryWithSDK(sqlQuery);
-        console.log("Step 2 & 3 & 4: Flipside Query Executed and Results Fetched via SDK.");
+        // 2. Submit the SQL query to Flipside
+        queryId = await submitFlipsideQuery(sqlQuery);
+        console.log("Step 2: Flipside Query Submitted.");
+
+        // 3. Wait for Flipside execution to complete
+        await waitForFlipsideExecution(queryId);
+        console.log("Step 3: Flipside Execution Completed.");
+
+        // 4. Get the results from Flipside
+        flipsideData = await getFlipsideQueryResults(queryId);
+        console.log("Step 4: Flipside Results Fetched.");
 
         // 5. Summarize Flipside Data using Gemini
         finalInsight = await summarizeFlipsideData(flipsideData, question);
@@ -331,6 +441,7 @@ exports.handler = async function(event, context) {
             insight: finalInsight,
             // Optionally include intermediate steps for debugging if needed
             // sql: sqlQuery,
+            // queryId: queryId,
             // rawFlipsideData: flipsideData // Be cautious with large data
         }),
     };
