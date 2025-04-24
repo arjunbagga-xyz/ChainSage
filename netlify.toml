@@ -20,7 +20,6 @@
   # Using a recent, stable LTS version is recommended.
   # Check Netlify docs for supported versions: https://docs.netlify.com/functions/build-with-javascript/#runtime-settings
   node_bundler = "esbuild" # Use esbuild for potentially better bundling
-  node_version = "18" # Or "20" - try a recent LTS version
 
   # Explicitly list modules that should NOT be bundled with the function code.
   # This can help resolve import errors for certain packages.
