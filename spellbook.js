@@ -1,6 +1,6 @@
-// This frontend code now calls a backend proxy (Netlify Function)
-// to handle API calls securely. API keys are NOT stored or used
-// directly in this file.
+// This frontend code calls a backend proxy (Netlify Function)
+// that uses Gemini and Covalent Goldrush APIs securely.
+// API keys are NOT stored or used directly in this file.
 
 // The URL for your Netlify Function endpoint.
 // Netlify automatically makes functions in netlify/functions available at /.netlify/functions/
@@ -20,13 +20,28 @@ function appendChat(userText, wizardText) {
   if (wizardText) {
     const wizardMsg = document.createElement('div');
     wizardMsg.className = 'chat-message wizard-message';
-    wizardMsg.textContent = `ChainSage: ${wizardText}`;
+    // Use innerHTML to render markdown for code blocks if needed (though less likely with Covalent summary)
+    wizardMsg.innerHTML = `ChainSage: ${formatWizardText(wizardText)}`;
     chatLog.appendChild(wizardMsg);
   }
 
   // Auto-scroll to the latest message
   chatLog.scrollTop = chatLog.scrollHeight;
 }
+
+// Helper function to format wizard text (less critical now, but good practice)
+function formatWizardText(text) {
+    // Simple markdown code block formatting (might not be used by the new backend)
+    let formattedText = text.replace(/```sql\s*([\s\S]*?)```/g, (match, code) => {
+        return `<pre><code class="language-sql">${code.trim()}</code></pre>`;
+    });
+     formattedText = formattedText.replace(/```json\s*([\s\S]*?)```/g, (match, code) => {
+        return `<pre><code class="language-json">${code.trim()}</code></pre>`;
+    });
+    // Add other formatting if needed (e.g., bold, italics)
+    return formattedText;
+}
+
 
 // --- Main Application Logic (Calls the Backend Proxy) ---
 async function askWizard(question) {
@@ -35,7 +50,6 @@ async function askWizard(question) {
 
   // Clear previous error messages if any
   const chatLog = document.getElementById('chat-log');
-  // Find and remove elements with the specific class for error messages
   const errorMessages = chatLog.querySelectorAll('.chat-message.error-message');
   errorMessages.forEach(msg => msg.remove());
 
@@ -43,7 +57,7 @@ async function askWizard(question) {
   // Display the user's question
   appendChat(question, null);
   // Display an initial message indicating processing is starting
-  appendChat(null, 'Casting spell... (Consulting the Oracle)');
+  appendChat(null, 'Casting spell... (Consulting the Covalent Oracle)');
 
   try {
     console.log(`Sending question to backend proxy: "${question}"`);
@@ -60,26 +74,33 @@ async function askWizard(question) {
 
     // Check if the response from the function was successful (status code 2xx)
     if (!response.ok) {
-      // If the function returned an error status, parse the error message from its body
+      // If the function returned an error status (e.g., 400, 500), parse the error message from its body
       const errorData = await response.json();
       console.error('Error response from proxy function:', errorData);
-      // Throw an error with the message from the function
-      throw new Error(errorData.error || `Proxy function returned error status: ${response.status}`);
+      // Display the error message from the function
+      appendChat(null, `An error occurred while consulting the Oracle: ${errorData.error || `Proxy function returned error status: ${response.status}`}`);
+      return; // Stop processing on non-OK response
     }
 
     // Parse the successful response from the function
     const result = await response.json();
     console.log('Successful response from proxy function:', result);
 
-    // Display the final insight received from the function
-    // The function returns the insight in the 'insight' property
-    appendChat(null, result.insight);
+    // The backend is designed to return the final insight in the 'insight' property
+    if (result.insight) {
+        appendChat(null, result.insight);
+    } else {
+        // Handle unexpected response format from the backend
+        console.error('Received unexpected response format from proxy function:', result);
+        appendChat(null, 'Received an unexpected response format from the Oracle.');
+    }
+
 
   } catch (error) {
-    // Handle any errors that occurred during the fetch or processing the response
+    // Handle any errors that occurred during the fetch itself (e.g., network issues)
     console.error('Error calling proxy function:', error);
     // Display a user-friendly error message
-    appendChat(null, `An error occurred while consulting the Oracle: ${error.message}`);
+    appendChat(null, `A network error occurred while trying to reach the Oracle: ${error.message}`);
   }
 }
 
