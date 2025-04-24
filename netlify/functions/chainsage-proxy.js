@@ -139,23 +139,23 @@ async function convertNLtoSQL(question) {
     **Strict Guidelines for Flipside SQL Generation:**
     1.  **Output Format:** Output ONLY the raw SQL query. Do NOT include any explanations, comments, markdown formatting (like \`\`\`sql\`), or any other text before or after the query.
     2.  **Platform:** The target platform is **Flipside Crypto** and it uses **Snowflake SQL**.
-    3.  **Table Names:** Use standard Flipside table names. Prioritize these common tables:
+    3.  **Table Names:** Use standard Flipside table names with their correct schema prefixes. **Default to the 'ethereum' chain prefix unless a different chain is explicitly mentioned in the question.** Prioritize these common tables and their likely schema paths:
         * \`ethereum.core.fact_transactions\` (for basic transaction data)
         * \`ethereum.core.fact_token_transfers\` (for token transfer events)
-        * \`erc20.tokens\` (for looking up token addresses by symbol)
-        * \`erc20.balances\` (for latest token balances per holder)
+        * \`ethereum.erc20.tokens\` (for looking up token addresses by symbol)
+        * \`ethereum.erc20.balances\` (for latest token balances per holder)
         * \`ethereum.prices.fact_hourly_token_prices\` (for token prices)
-        * Use similar table names for other chains if the question specifies (e.g., \`solana.core.fact_transactions\`, \`polygon.core.fact_token_transfers\`).
+        * For other chains (e.g., Solana, Polygon), use the appropriate chain prefix (e.g., \`solana.core.fact_transactions\`, \`polygon.erc20.balances\`).
     4.  **Column Names:** Use standard Flipside column names like \`block_timestamp\`, \`block_time\`, \`tx_hash\`, \`from_address\`, \`to_address\`, \`contract_address\`, \`token_address\`, \`symbol\`, \`holder\`, \`balance\`, \`amount\`, \`price\`.
     5.  **Date/Time Filtering:** Use \`block_timestamp\` or \`block_time\` for time filtering. Employ Snowflake-compatible functions:
         * For "today": \`WHERE DATE(block_time) = CURRENT_DATE()\` or \`WHERE block_timestamp >= CURRENT_DATE()\`
         * For time ranges: \`WHERE block_timestamp >= CURRENT_DATE() - INTERVAL 'N day'\` or \`INTERVAL 'N month'\`
         * For hourly grouping: \`date_trunc('hour', block_timestamp)\`
-    6.  **Token Address Lookup:** To filter by a token symbol, always use a subquery on \`erc20.tokens\` to get the \`token_address\`. Example: \`WHERE token_address = (SELECT token_address FROM erc20.tokens WHERE symbol = 'TOKEN_SYMBOL')\`. Ensure the token symbol is in uppercase.
-    7.  **Token Balances:** The \`erc20.balances\` table provides the latest balance per \`holder\` for a given \`token_address\`. Filter by \`balance > 0\` to count actual holders.
+    6.  **Token Address Lookup:** To filter by a token symbol, always use a subquery on the appropriate \`erc20.tokens\` table (e.g., \`ethereum.erc20.tokens\`) to get the \`token_address\`. Example: \`WHERE token_address = (SELECT token_address FROM ethereum.erc20.tokens WHERE symbol = 'TOKEN_SYMBOL')\`. Ensure the token symbol is in uppercase.
+    7.  **Token Balances:** The appropriate \`erc20.balances\` table (e.g., \`ethereum.erc20.balances\`) provides the latest balance per \`holder\` for a given \`token_address\`. Filter by \`balance > 0\` to count actual holders.
     8.  **Counting:** Use \`COUNT(DISTINCT column_name)\` for unique counts (e.g., \`COUNT(DISTINCT tx_hash)\`, \`COUNT(DISTINCT from_address)\`, \`COUNT(DISTINCT to_address)\`, \`COUNT(DISTINCT holder)\`).
     9.  **Simplicity & Efficiency:** Generate the simplest possible query that answers the question using the available tables and columns. Avoid unnecessary complexity.
-    10. **Error Handling:** If the question is too complex, ambiguous, or cannot be answered with a single, standard Flipside SQL query, output: "ERROR: Cannot formulate query".
+    10. **Error Handling:** If the question is too complex, ambiguous, or cannot be answered with a single, standard Flipside SQL query using the specified tables and patterns, output: "ERROR: Cannot formulate query".
 
     Analyze the following natural language question and generate the corresponding Flipside Snowflake SQL query:
 
