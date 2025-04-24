@@ -113,6 +113,7 @@ async function convertNLtoSQL(question) {
     2. Construct a simple, standard SQL query representing the data request, using common blockchain table names.
     3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
     4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
+    5. The output query should be in accordance with flipside database API
 
     Natural Language Question:
     "${question}"
