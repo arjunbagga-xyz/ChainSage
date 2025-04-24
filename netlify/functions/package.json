@@ -1,0 +1,6 @@
+{
+  "name": "chainsage-functions",
+  "version": "1.0.0",
+  "description": "Netlify functions for ChainSage backend proxy",
+  "main": "chainsage-proxy.js"
+}
