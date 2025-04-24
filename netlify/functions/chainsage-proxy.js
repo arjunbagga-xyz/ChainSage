@@ -145,6 +145,7 @@ async function convertNLtoSQL(question) {
     2. Construct a simple, standard SQL query representing the data request, using common blockchain table names.
     3. Output ONLY the raw SQL query. No explanations, comments, or markdown.
     4. If the question is too complex or ambiguous for a simple data query, output: "ERROR: Cannot formulate query".
+    5. you are querying flipside API (https://docs.flipsidecrypto.xyz/data/flipside-data/data-table-documentation).
 
     Natural Language Question:
     "${question}"
@@ -223,6 +224,14 @@ async function submitFlipsideQuery(sqlQuery) {
 
     // Use the V2 JSON-RPC endpoint
     const data = await fetchApi(FLIPSIDE_API_ENDPOINT, options, 'Flipside (Submit Query)');
+
+    // --- Debugging Logs ---
+    console.log("Debug: Full response from Flipside submit:", JSON.stringify(data, null, 2));
+    console.log("Debug: data?.result:", data?.result);
+    console.log("Debug: data?.result?.queryRun:", data?.result?.queryRun);
+    console.log("Debug: data?.result?.queryRun?.queryRunId:", data?.result?.queryRun?.queryRunId);
+    // --- End Debugging Logs ---
+
 
     // Flipside V2 returns the queryRunId in the 'result.queryRun.queryRunId' property
     // Using optional chaining for a more resilient check, and checking the full path
