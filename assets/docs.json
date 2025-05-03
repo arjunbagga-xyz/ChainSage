@@ -4,265 +4,341 @@
     "name": "Get Market Data",
     "description": "Get market data for any crypto token.",
     "request": "GET /1/market/data",
-    "response_fields": "Includes id, name, symbol, price, market_cap, volume, price_change_24h, contracts, etc."
+    "response_fields": "Includes id, name, symbol, price, market_cap, volume, price_change_24h, contracts, etc.",
+    "required_parameters": ["id"],
+    "path": "/1/market/data"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Market Data (batch)",
     "description": "Get market data for multiple crypto tokens at once (up to 500).",
     "request": "GET /1/market/multi-data",
-    "response_fields": "Returns an object (data) or array (dataArray) containing market data for each requested asset, keyed by the asset identifier."
+    "response_fields": "Returns an object (data) or array (dataArray) containing market data for each requested asset, keyed by the asset identifier.",
+    "required_parameters": ["ids"],
+    "path": "/1/market/multi-data"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Market Pair",
     "description": "Get data for a specific trading pair on a decentralized exchange.",
     "request": "GET /1/market/pair",
-    "response_fields": "Includes details for token0, token1, volume24h, liquidity, blockchain, address, exchange, price, and trade statistics if requested."
+    "response_fields": "Includes details for token0, token1, volume24h, liquidity, blockchain, address, exchange, price, and trade statistics if requested.",
+    "required_parameters": ["pair_id"],
+    "path": "/1/market/pair"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get All Pairs",
     "description": "Get all trading pairs for a specific asset.",
     "request": "GET /1/market/pairs",
-    "response_fields": "Returns a list of pair objects, each containing details similar to the 'Get Market Pair' response, plus a total_count."
+    "response_fields": "Returns a list of pair objects, each containing details similar to the 'Get Market Pair' response, plus a total_count.",
+    "required_parameters": ["asset_id"],
+    "path": "/1/market/pairs"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Pair Trades",
     "description": "Get recent trades for a specific trading pair or asset's largest pair.",
     "request": "GET /1/market/trades/pair",
-    "response_fields": "Returns a list of trade objects including hash, pair, date, token_price, token_amount_usd, type, sender."
+    "response_fields": "Returns a list of trade objects including hash, pair, date, token_price, token_amount_usd, type, sender.",
+    "required_parameters": ["pair_id"],
+    "path": "/1/market/trades/pair"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Historical Market Data",
     "description": "Get historical price, volume, and market cap data for an asset.",
     "request": "GET /1/market/history",
-    "response_fields": "Includes price_history, volume_history, market_cap_history arrays with timestamps and values."
+    "response_fields": "Includes price_history, volume_history, market_cap_history arrays with timestamps and values.",
+    "required_parameters": ["id", "from", "to"],
+    "path": "/1/market/history"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Historical Market Data (batch)",
     "description": "Get historical market data for multiple assets at once.",
     "request": "GET /1/market/multi-history",
-    "response_fields": "Returns a list of objects, each containing historical data (price_history, etc.) for a requested asset."
+    "response_fields": "Returns a list of objects, each containing historical data (price_history, etc.) for a requested asset.",
+    "required_parameters": ["ids", "from", "to"],
+    "path": "/1/market/multi-history"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Historical Pair Data (OHLCV)",
     "description": "Get historical Open, High, Low, Close, and Volume (OHLCV) data for a specific trading pair.",
     "request": "GET /1/market/history/pair",
-    "response_fields": "Returns a list of candle objects with volume, open, high, low, close, time."
+    "response_fields": "Returns a list of candle objects with volume, open, high, low, close, time.",
+    "required_parameters": ["pair_id", "from", "to", "resolution"],
+    "path": "/1/market/history/pair"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Query Asset Data",
     "description": "Run SQL-like queries against market data for assets.",
     "request": "GET /1/market/query",
-    "response_fields": "Returns a list of asset objects matching the query filters, including name, symbol, liquidity, market_cap, price, contracts."
+    "response_fields": "Returns a list of asset objects matching the query filters, including name, symbol, liquidity, market_cap, price, contracts.",
+    "required_parameters": ["query"],
+    "path": "/1/market/query"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Query Token Data",
     "description": "Run SQL-like queries against market data specifically for tokens.",
     "request": "GET /1/market/query/token",
-    "response_fields": "Returns a list of token objects with details like name, symbol, address, blockchain, volume_24h, pairs."
+    "response_fields": "Returns a list of token objects with details like name, symbol, address, blockchain, volume_24h, pairs.",
+    "required_parameters": ["query"],
+    "path": "/1/market/query/token"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Token Holders",
     "description": "Get a list of holders for a specific token.",
     "request": "GET /1/market/token/holders",
-    "response_fields": "Returns a list of holder objects including address, amount, totalSupplyShare, amountUSD, plus total_count."
+    "response_fields": "Returns a list of holder objects including address, amount, totalSupplyShare, amountUSD, plus total_count.",
+    "required_parameters": ["token_address"],
+    "path": "/1/market/token/holders"
   },
   {
     "endpoint_group": "Octopus - Market API",
     "name": "Get Blockchain Pairs",
     "description": "Get pairs data filtered by blockchain, with sorting and filtering options.",
     "request": "GET /1/market/blockchain/pairs",
-    "response_fields": "Returns a list of pair objects with price changes, volume, trade counts, liquidity, and nested pair details."
+    "response_fields": "Returns a list of pair objects with price changes, volume, trade counts, liquidity, and nested pair details.",
+    "required_parameters": ["blockchain"],
+    "path": "/1/market/blockchain/pairs"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get NFTs Holdings",
     "description": "Get the NFT holdings for a specific wallet address.",
     "request": "GET /1/wallet/nfts",
-    "response_fields": "Returns a list of NFT objects including token_address, token_id, name, symbol, blockchain, plus pagination details."
+    "response_fields": "Returns a list of NFT objects including token_address, token_id, name, symbol, blockchain, plus pagination details.",
+    "required_parameters": ["address"],
+    "path": "/1/wallet/nfts"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Historical Net Worth",
     "description": "Get the historical total balance (net worth) of one or more wallets.",
     "request": "GET /1/wallet/history",
-    "response_fields": "Includes wallets, balance_usd, and balance_history array."
+    "response_fields": "Includes wallets, balance_usd, and balance_history array.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/history"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Crypto Holdings",
     "description": "Get the current crypto asset holdings for one or more wallets.",
     "request": "GET /1/wallet/portfolio",
-    "response_fields": "Includes total_wallet_balance, list of wallets, list of assets with balances, allocation, PnL details, etc."
+    "response_fields": "Includes total_wallet_balance, list of wallets, list of assets with balances, allocation, PnL details, etc.",
+    "required_parameters": ["addresses"],
+    "path": "/1/wallet/portfolio"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Crypto Holdings (batch)",
     "description": "Get the current crypto asset holdings for multiple wallets in a single call.",
     "request": "GET /1/wallet/multi-portfolio",
-    "response_fields": "Similar structure to 'Get Crypto Holdings', aggregating data for all specified wallets."
+    "response_fields": "Similar structure to 'Get Crypto Holdings', aggregating data for all specified wallets.",
+    "required_parameters": ["addresses"],
+    "path": "/1/wallet/multi-portfolio"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Defi-Positions Holdings",
     "description": "Get DeFi positions (like liquidity pool stakes) for one or more wallets.",
     "request": "GET /1/wallet/defi-positions",
-    "response_fields": "Returns a list of protocols and the wallet's positions within them, including tokens, rewards, and extra details."
+    "response_fields": "Returns a list of protocols and the wallet's positions within them, including tokens, rewards, and extra details.",
+    "required_parameters": ["addresses"],
+    "path": "/1/wallet/defi-positions"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Historical Transactions",
     "description": "Get a history of transactions for one or more wallets, enriched with asset data.",
     "request": "GET /1/wallet/transactions",
-    "response_fields": "Returns a list of transactions including timestamp, from, to, hash, amount_usd, type, blockchain, tx_cost, and nested asset details."
+    "response_fields": "Returns a list of transactions including timestamp, from, to, hash, amount_usd, type, blockchain, tx_cost, and nested asset details.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/transactions"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Transactions",
     "description": "Get raw and unified native transaction data for one or more wallets.",
     "request": "GET /1/wallet/raw-transactions",
-    "response_fields": "Returns both raw transaction data and a unified format, plus pagination."
+    "response_fields": "Returns both raw transaction data and a unified format, plus pagination.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/raw-transactions"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Token Transfers",
     "description": "Get raw and unified token transfer data (e.g., ERC-20) for one or more wallets.",
     "request": "GET /1/wallet/token-transfers",
-    "response_fields": "Returns both raw transfer data and a unified format, plus pagination."
+    "response_fields": "Returns both raw transfer data and a unified format, plus pagination.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/token-transfers"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get NFTs Transfers",
     "description": "Get raw and unified NFT transfer data (e.g., ERC-721) for one or more wallets.",
     "request": "GET /1/wallet/nft-transfers",
-    "response_fields": "Returns both raw NFT transfer data and a unified format, plus pagination."
+    "response_fields": "Returns both raw NFT transfer data and a unified format, plus pagination.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/nft-transfers"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Smart Money",
     "description": "Get analytics on specified \"smart money\" wallets.",
     "request": "GET /1/wallet/smart-money",
-    "response_fields": "Returns a list of wallet objects with PnL, transaction counts, volume, win rate, and token distribution analysis."
+    "response_fields": "Returns a list of wallet objects with PnL, transaction counts, volume, win rate, and token distribution analysis.",
+    "required_parameters": ["addresses"],
+    "path": "/1/wallet/smart-money"
   },
   {
     "endpoint_group": "[BETA] Wallet Explorer API",
     "name": "Get Wallet Trades",
     "description": "Get swap/trade events for one or more wallets.",
     "request": "GET /1/wallet/trades",
-    "response_fields": "Returns a list of trade objects including swap_type, amounts, ratio, prices, date, amount_usd, pool details."
+    "response_fields": "Returns a list of trade objects including swap_type, amounts, ratio, prices, date, amount_usd, pool details.",
+    "required_parameters": ["addresses", "from", "to"],
+    "path": "/1/wallet/trades"
   },
   {
     "endpoint_group": "Raw Data API",
     "name": "Get Raw Events",
     "description": "Get raw blockchain event logs with filtering options.",
     "request": "GET /2/events",
-    "response_fields": "Returns raw event logs including transaction_hash, log_index, address, data, topics, timestamp, plus pagination."
+    "response_fields": "Returns raw event logs including transaction_hash, log_index, address, data, topics, timestamp, plus pagination.",
+    "required_parameters": ["blockchain", "contract_address"],
+    "path": "/2/events"
   },
   {
     "endpoint_group": "Raw Data API",
     "name": "Get Raw Blocks",
     "description": "Get raw and formatted data for a specific block number or hash.",
     "request": "GET /2/blocks/specific",
-    "response_fields": "Returns raw block data (like hash, parent_hash, timestamp, transactions) and unified formatted fields."
+    "response_fields": "Returns raw block data (like hash, parent_hash, timestamp, transactions) and unified formatted fields.",
+    "required_parameters": ["blockchain", "block_number_or_hash"],
+    "path": "/2/blocks/specific"
   },
   {
     "endpoint_group": "Raw Data API",
     "name": "Get Raw Transaction",
     "description": "Get raw transaction data for a specific transaction hash.",
     "request": "GET /2/txs/specific",
-    "response_fields": "Returns raw transaction details (like hash, gas info, from, status, payload info) and unified formatted fields."
+    "response_fields": "Returns raw transaction details (like hash, gas info, from, status, payload info) and unified formatted fields.",
+    "required_parameters": ["blockchain", "transaction_hash"],
+    "path": "/2/txs/specific"
   },
   {
     "endpoint_group": "Raw Data API",
     "name": "Get Raw Block Transactions",
     "description": "Get all transactions within a specific block.",
     "request": "GET /2/blocks/transactions",
-    "response_fields": "Returns raw transaction data for the block and unified formatted fields, plus pagination."
+    "response_fields": "Returns raw transaction data for the block and unified formatted fields, plus pagination.",
+    "required_parameters": ["blockchain", "block_number_or_hash"],
+    "path": "/2/blocks/transactions"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get All Cryptocurrencies",
     "description": "Get a list of all cryptocurrencies curated by Mobula.",
     "request": "GET /1/all",
-    "response_fields": "Returns a list of assets including id, name, symbol, logo, price, price changes, market_cap, contracts, social links."
+    "response_fields": "Returns a list of assets including id, name, symbol, logo, price, price changes, market_cap, contracts, social links.",
+    "required_parameters": [],
+    "path": "/1/all"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Search by name",
     "description": "Search for assets, pairs, or tokens by name or other criteria.",
     "request": "GET /1/search",
-    "response_fields": "Returns a list of matching items (tokens, assets, or pairs) based on the input query and filters."
+    "response_fields": "Returns a list of matching items (tokens, assets, or pairs) based on the input query and filters.",
+    "required_parameters": ["query"],
+    "path": "/1/search"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get Metadata",
     "description": "Get detailed metadata for a specific asset.",
     "request": "GET /1/metadata",
-    "response_fields": "Includes id, name, symbol, contracts, social links, logo, market data (price, market_cap, etc.), description, tokenomics details (distribution, release_schedule), investors, etc."
+    "response_fields": "Includes id, name, symbol, contracts, social links, logo, market data (price, market_cap, etc.), description, tokenomics details (distribution, release_schedule), investors, etc.",
+    "required_parameters": ["id"],
+    "path": "/1/metadata"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get Metadata (batch)",
     "description": "Get metadata for multiple assets at once.",
     "request": "GET /1/multi-metadata",
-    "response_fields": "Returns a list of objects, each containing the full metadata response for a requested asset."
+    "response_fields": "Returns a list of objects, each containing the full metadata response for a requested asset.",
+    "required_parameters": ["ids"],
+    "path": "/1/multi-metadata"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get Meta Trendings",
     "description": "Get assets currently trending across different platforms (CoinMarketCap, CoinGecko, LamboTrendings).",
     "request": "GET /1/metadata/trendings",
-    "response_fields": "Returns a list of trending assets with name, symbol, contracts, price data, logo, trending_score, and source platforms."
+    "response_fields": "Returns a list of trending assets with name, symbol, contracts, price data, logo, trending_score, and source platforms.",
+    "required_parameters": [],
+    "path": "/1/metadata/trendings"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get All Categories",
     "description": "Get a list of all cryptocurrency categories with aggregated market data.",
     "request": "GET /1/metadata/categories",
-    "response_fields": "Returns a list of category objects with name, market_cap, and market cap changes (24h, 7d)."
+    "response_fields": "Returns a list of category objects with name, market_cap, and market cap changes (24h, 7d).",
+    "required_parameters": [],
+    "path": "/1/metadata/categories"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Get All Blockchains",
     "description": "Get a list of all supported blockchains with their configuration details.",
     "request": "GET /1/blockchains",
-    "response_fields": "Returns a list of blockchain objects including name, chainId, rpcs, explorer, native token (eth), stablecoin (stable), routers, logo."
+    "response_fields": "Returns a list of blockchain objects including name, chainId, rpcs, explorer, native token (eth), stablecoin (stable), routers, logo.",
+    "required_parameters": [],
+    "path": "/1/blockchains"
   },
   {
     "endpoint_group": "Metacore API",
     "name": "Query Blockchain Tables",
     "description": "Execute SQL queries against Mobula's blockchain data tables (like PairTick, Trade, EVMEvent).",
     "request": "POST /blockchain-query (Requires SQL in the request body)",
-    "response_fields": "Returns the results of the SQL query."
+    "response_fields": "Returns the results of the SQL query.",
+    "required_parameters": ["query"],
+    "path": "/blockchain-query"
   },
-  {
+    {
     "endpoint_group": "Metacore API",
     "name": "Decode Blockchain Events",
     "description": "Decode blockchain event data (used in conjunction with Query Blockchain Tables).",
     "request": "POST /blockchain-decode",
-    "response_fields": "(Response format not explicitly detailed, likely returns decoded event parameters)."
+    "response_fields": "(Response format not explicitly detailed, likely returns decoded event parameters).",
+    "required_parameters": ["blockchain", "data", "topics"],
+    "path": "/blockchain-decode"
   },
   {
     "endpoint_group": "Misc API",
     "name": "Get Sparkline",
     "description": "Get a URL for a 24-hour price sparkline image (SVG or PNG) for an asset.",
     "request": "GET /1/market/sparkline",
-    "response_fields": "Returns an object containing the url of the sparkline image."
+    "response_fields": "Returns an object containing the url of the sparkline image.",
+    "required_parameters": ["id"],
+    "path": "/1/market/sparkline"
   },
   {
     "endpoint_group": "Misc API",
     "name": "Get CeFi Funding Rate",
     "description": "Get the current perpetual funding rates for an asset from CeFi exchanges (Binance, Deribit).",
     "request": "GET /1/market/cefi/funding-rate",
-    "response_fields": "Includes funding rate details from binanceFundingRate and deribitFundingRate."
+    "response_fields": "Includes funding rate details from binanceFundingRate and deribitFundingRate.",
+    "required_parameters": ["id"],
+    "path": "/1/market/cefi/funding-rate"
   }
 ]
