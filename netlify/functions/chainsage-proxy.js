@@ -39,13 +39,18 @@ async function fetchApi(url, options, serviceName) {
 
         const defaultHeaders = {
             'User-Agent': 'ChainSage-Netlify-Function/1.0',
-            ...(MODULA_API_KEY && serviceName === 'Modula' ? { 'Authorization': MODULA_API_KEY } : {}), // Add Modula API key if needed
-            ...options.headers,
         };
+
+        if (serviceName === 'Modula' && MODULA_API_KEY) {
+            defaultHeaders['Authorization'] =  MODULA_API_KEY;
+        }
 
         const fetchOptions = {
             ...options,
-            headers: defaultHeaders,
+            headers: {
+                ...defaultHeaders,
+                ...(options.headers || {}), // Merge any user-provided headers *after* our defaults
+            },
         };
 
         response = await fetch(url, fetchOptions);
@@ -77,7 +82,7 @@ async function fetchApi(url, options, serviceName) {
 
     } catch (error) {
         console.error(`Fetch error during call to ${serviceName}:`, error);
-        if (error.service) {
+         if (error.service) {
             throw error;
         }
         const fetchErr = new Error(`API call failed to ${serviceName}: ${error.message}${responseBodyText ? ` Body: ${responseBodyText.substring(0, 200)}...` : ''}`);
