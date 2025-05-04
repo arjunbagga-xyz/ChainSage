@@ -201,6 +201,7 @@ async function callModulaApi(endpoint, params) {
         method: 'GET', // All Modula endpoints in docs.json use GET
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': MODULA_API_KEY,
         },
     };
 
