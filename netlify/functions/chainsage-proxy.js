@@ -192,24 +192,19 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
 
 // 2. Function to call the Modula API
 async function callModulaApi(endpoint, params) {
-    const url = `${MODULA_API_BASE_URL}${endpoint.path}`; // Use the path from docs.json
-
-     // Construct query parameters.  Note that all the endpoints provided use query parameters.
+    const url = `<span class="math-inline">\{MODULA\_API\_BASE\_URL\}</span>{endpoint.path}`;
     const urlParams = new URLSearchParams();
     for (const key in params) {
         urlParams.append(key, params[key]);
     }
     const fullUrl = url + '?' + urlParams.toString();
-    
-
+    console.log("Modula API URL:", fullUrl); // Add this line
     const options = {
-        method: 'GET', // All Modula endpoints in docs.json use GET
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': MODULA_API_KEY,
         },
     };
-
     const data = await fetchApi(fullUrl, options, 'Modula');
     return data;
 }
