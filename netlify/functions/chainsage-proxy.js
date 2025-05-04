@@ -165,13 +165,22 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         throw new Error('Received invalid response structure from Gemini (NL to Endpoint).');
     }
 
+    let geminiResponse;
     try {
-        const geminiResponse = JSON.parse(data.candidates[0].content.parts[0].text.trim());
-        return geminiResponse;
+        geminiResponse = JSON.parse(data.candidates[0].content.parts[0].text.trim());
     } catch (e) {
         console.error("Gemini output was not valid JSON:", data.candidates[0].content.parts[0].text.trim(), e);
-        throw new Error("Gemini output was not valid JSON.  Could not determine appropriate Modula endpoint.");
+        //  Attempt to remove the ```json ``` block, and try again.
+        const cleanedText = data.candidates[0].content.parts[0].text.trim().replace(/```json\n([\s\S]*)\n```/g, '$1');
+        try {
+            geminiResponse = JSON.parse(cleanedText);
+            console.log("Successfully parsed cleaned Gemini output.");
+        }
+        catch (e2) {
+            throw new Error("Gemini output was not valid JSON.  Could not determine appropriate Modula endpoint.");
+        }
     }
+    return geminiResponse;
 }
 
 
