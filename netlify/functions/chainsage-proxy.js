@@ -290,7 +290,7 @@ exports.handler = async function (event, context) {
 
     try {
         // 1. Get Modula endpoint and parameters
-        const endpointData = await getModulaEndpointAndParams(question,  JSON.parse(JSON.stringify(require('docs.json')))); //pass a deep copy
+        const endpointData = await getModulaEndpointAndParams(question,  JSON.parse(JSON.stringify(require('./docs.json')))); //pass a deep copy
         console.log("Step 1: Endpoint and Parameters determined:", endpointData);
 
         // 2. Decision: Can we query, or do we need more info?
