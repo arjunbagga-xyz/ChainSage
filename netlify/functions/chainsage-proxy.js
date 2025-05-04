@@ -192,22 +192,28 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
 
 // 2. Function to call the Modula API
 async function callModulaApi(endpoint, params) {
-    const url = `<span class="math-inline">\{MODULA\_API\_BASE\_URL\}</span>{endpoint.path}`;
+    const url = `${MODULA_API_BASE_URL}${endpoint.path}`; // Use the path from docs.json
+
+    // Construct query parameters.
     const urlParams = new URLSearchParams();
     for (const key in params) {
         urlParams.append(key, params[key]);
     }
     const fullUrl = url + '?' + urlParams.toString();
+
     console.log("Modula API URL:", fullUrl); // Add this line
+
     const options = {
-        method: 'GET',
+        method: 'GET', // All Modula endpoints in docs.json use GET
         headers: {
-            'Content-Type': 'application/json',
+            //  'Content-Type': 'application/json', //removed this
         },
     };
+
     const data = await fetchApi(fullUrl, options, 'Modula');
     return data;
 }
+
 
 // 3. Function to summarize the data using Gemini
 async function summarizeModulaData(modulaData, originalQuestion) {
