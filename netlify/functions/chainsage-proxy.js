@@ -10,7 +10,7 @@
 // Retrieve API keys from Netlify Environment Variables.
 const GEMINI_API_KEY = process.env.GEMINI_API;
 const MODULA_API_KEY = process.env.MODULA_API; // New: Modula API Key
-const MODULA_API_BASE_URL = 'https://api.mobula.io'; // Define the base URL
+const MODULA_API_BASE_URL = 'https://api.mobula.io/api'; // Define the base URL
 
 // --- API Configuration ---
 const GEMINI_MODEL = 'gemini-2.0-flash';
