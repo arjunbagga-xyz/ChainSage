@@ -39,7 +39,7 @@ async function fetchApi(url, options, serviceName) {
 
         const defaultHeaders = {
             'User-Agent': 'ChainSage-Netlify-Function/1.0',
-            ...(MODULA_API_KEY && serviceName === 'Modula' ? { 'x-api-key': MODULA_API_KEY } : {}), // Add Modula API key if needed
+            ...(MODULA_API_KEY && serviceName === 'Modula' ? { 'Authorization': MODULA_API_KEY } : {}), // Add Modula API key if needed
             ...options.headers,
         };
 
