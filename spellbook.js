@@ -46,7 +46,7 @@ async function askWizard(question) {
     // Display the user's question
     appendChat(question, null);
     // Display an initial message indicating processing is starting.  Updated for Modula.
-    appendChat(null, 'Consulting the Mobula Oracle...');
+    appendChat(null, 'Casting spell...');
 
     try {
         console.log(`Sending question to backend proxy: "${question}"`);
