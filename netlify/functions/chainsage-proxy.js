@@ -182,7 +182,7 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
             console.log("Successfully parsed cleaned Gemini output.");
         }
         catch (e2) {
-            throw new Error("Gemini output was not valid JSON.  Could not determine appropriate Modula endpoint.");
+            throw new Error("Gemini output was not valid JSON.");
         }
     }
     return geminiResponse;
