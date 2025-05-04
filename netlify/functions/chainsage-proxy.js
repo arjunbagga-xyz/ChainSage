@@ -98,28 +98,30 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         
         Your task is to:
         1.  Analyze the user's question and determine the user's intent.
-        2.  Identify the single most relevant endpoint from the list above that can fulfill the user's request.
-        3.  Extract any parameters mentioned in the user's question that match the 'required_parameters' of the identified endpoint.  The parameter names are case-sensitive.
-        4.  Determine if all 'required_parameters' for the chosen endpoint are present in the extracted parameters.
-        5.  Generate a concise message for the user, following these rules:
-            * If all required parameters are present, the message should be empty ("").
-            * If any required parameters are missing, the message should clearly state which parameters are missing (e.g., "Missing parameter: id").
-            * If the user asks a question and it is not possible to form a query, respond "I cannot answer this question with the available tools."
-        
+        2.  Identify the single most relevant endpoint(s) from the list above that can fulfill the user's request.
+        3.  Extract any parameters mentioned in the user's question that match the 'required_parameters' of the identified endpoint(s).  The parameter names are case-sensitive.
+        4.  Determine if a query is possible.
+        5.  Generate a response, following these rules:
+            * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
+            * If a query is not possible, return a JSON object explaining why and what information is missing.
         
         Example 1:
         User Question: "What is the price of Bitcoin?"
         
         Your Response:
         {
-            "endpoint_group": "Octopus - Market API",
-            "name": "Get Market Data",
-            "extracted_parameters": {
-                "id": "bitcoin"
-            },
-            "required_parameters": ["id"],
             "can_query": true,
-            "user_message": ""
+            "endpoints": [
+                {
+                    "endpoint_group": "Octopus - Market API",
+                    "name": "Get Market Data",
+                    "extracted_parameters": {
+                        "id": "bitcoin"
+                    },
+                    "required_parameters": ["id"],
+                    "path": "/1/market/data"
+                }
+            ]
         }
         
         Example 2:
@@ -127,27 +129,17 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         
         Your Response:
         {
-            "endpoint_group": "Octopus - Market API",
-            "name": "Get Historical Market Data",
-            "extracted_parameters": {},
-            "required_parameters": ["id", "from", "to"],
             "can_query": false,
-            "user_message": "Missing parameters: id, from, to"
+            "message": "Missing parameters: id, from, to.  Please specify the asset ID and the time range."
         }
         
          Example 3:
          User Question: "tell me about the top gainers in the last 24 hours"
          Your Response:
         {
-            "endpoint_group": null,
-            "name": null,
-            "extracted_parameters": {},
-            "required_parameters": [],
             "can_query": false,
-            "user_message": "I cannot answer this question with the available tools."
+            "message": "I cannot answer this question with the available tools."
         }
-        
-        
         
         Analyze the following user question and provide your response as a JSON object:
         
@@ -290,21 +282,19 @@ exports.handler = async function (event, context) {
 
     try {
         // 1. Get Modula endpoint and parameters
-        const endpointData = await getModulaEndpointAndParams(question,  JSON.parse(JSON.stringify(require('./docs.json')))); //pass a deep copy
+        const endpointData = await getModulaEndpointAndParams(question,  JSON.parse(JSON.stringify(require('./docs.json'))));
         console.log("Step 1: Endpoint and Parameters determined:", endpointData);
 
-        // 2. Decision: Can we query, or do we need more info?
+        // 2.  Check if we can query.  If not, return to user.
         if (!endpointData.can_query) {
-            console.log("Insufficient information to query Modula.");
             return {
-                statusCode: 200, //  Return 200 because it is a successful response.
+                statusCode: 200,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ insight: endpointData.user_message }),
+                body: JSON.stringify({ insight: endpointData.message }), // Return the message from LLM
             };
         }
-
-        // 3. Call Modula API
-        const modulaResponse = await callModulaApi(endpointData, endpointData.extracted_parameters);
+        // 3. Call Modula API (if query is possible)
+        const modulaResponse = await callModulaApi(endpointData.endpoints[0], endpointData.endpoints[0].extracted_parameters);  //changed from endpointData to endpointData.endpoints[0]
         console.log("Step 2: Modula API called successfully.");
 
         // 4. Summarize the data
