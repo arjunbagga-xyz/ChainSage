@@ -1,312 +1,688 @@
 [
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Market Data",
-    "path": "/1/market/data",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["id", "asset", "symbol", "blockchain"],
-    "description": "Retrieves market data for a specific asset."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Market Data (batch)",
-    "path": "/1/market/multi-data",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["ids", "assets", "symbols", "blockchains"],
-    "description": "Retrieves market data for multiple assets in a single request."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Market Pair",
-    "path": "/1/market/pair",
-    "method": "GET",
-    "required_parameters": ["pair"],
-    "description": "Retrieves market data for a specific trading pair."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get All Pairs",
-    "path": "/1/market/pairs",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves all available trading pairs."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Pair Trades",
-    "path": "/1/market/trades-pair",
-    "method": "GET",
-    "required_parameters": ["pair"],
-    "description": "Retrieves trades for a specific trading pair."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Historical Market Data",
-    "path": "/1/market/history",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["id", "from", "to"],
-    "description": "Retrieves historical market data for a specific asset."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Historical Market Data (batch)",
-    "path": "/1/market/multi-history",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["ids", "froms", "tos", "symbols", "assets", "blockchains", "period"],
-    "description": "Retrieves historical market data for multiple assets."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Historical Pair Data (OHLCV)",
-    "path": "/1/market/history-pair",
-    "method": "GET",
-    "required_parameters": ["pair", "from", "to"],
-    "description": "Retrieves historical OHLCV data for a trading pair."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Query Asset Data",
-    "path": "/1/market/query",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Queries asset data with flexible filters."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Query Token Data",
-    "path": "/1/market/query/token",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Queries token data."
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Token Holders",
-    "path": "/1/market/token-holders",
-    "method": "GET",
-    "required_parameters": ["tokenAddress"],
-    "description": "Retrieves token holders for a contract address"
-  },
-  {
-    "endpoint_group": "Octopus - Market API",
-    "name": "Get Blockchain Pairs",
-    "path": "/1/market/blockchain-pairs",
-    "method": "GET",
-    "required_parameters": ["blockchain"],
-    "description": "Retrieves pairs for a specific blockchain."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get NFTs Holdings",
-    "path": "/1/wallet/nfts",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves NFT holdings for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Historical Net Worth",
-    "path": "/1/wallet/history",
-    "method": "GET",
-    "required_parameters": ["wallet", "from", "to"],
-    "description": "Retrieves historical net worth for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Crypto Holdings",
-    "path": "/1/wallet/portfolio",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves crypto holdings for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Crypto Holdings (batch)",
-    "path": "/1/wallet/multi-portfolio",
-    "method": "GET",
-    "required_parameters": ["wallets"],
-    "description": "Retrieves crypto holdings for multiple wallets."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Defi-Positions Holdings",
-    "path": "/1/wallet/defi-positions",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves DeFi positions for a wallet"
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Historical Transactions",
-    "path": "/1/wallet/transactions",
-    "method": "GET",
-    "required_parameters": ["wallet", "from", "to"],
-    "description": "Retrieves historical transactions for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Transactions",
-    "path": "/1/wallet/raw-transactions",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves raw transactions for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Token Transfers",
-    "path": "/1/wallet/token-transfers",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves token transfers for a wallet."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get NFTs Transfers",
-    "path": "/1/wallet/nft-transfers",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Get NFTs Transfers"
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Smart Money",
-    "path": "/1/wallet/smart-money",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves smart money wallets."
-  },
-  {
-    "endpoint_group": "[BETA] Wallet Explorer API",
-    "name": "Get Wallet Trades",
-    "path": "/1/wallet/trades",
-    "method": "GET",
-    "required_parameters": ["wallet"],
-    "description": "Retrieves trades for a wallet."
-  },
-  {
-    "endpoint_group": "Raw Data",
-    "name": "Get Raw Events",
-    "path": "/1/raw/events",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves raw events."
-  },
-  {
-    "endpoint_group": "Raw Data",
-    "name": "Get Raw Blocks",
-    "path": "/1/raw/block",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["blockchain", "blockId"],
-    "description": "Retrieves raw blocks."
-  },
-  {
-    "endpoint_group": "Raw Data",
-    "name": "Get Raw Transaction",
-    "path": "/1/raw/transaction",
-    "method": "GET",
-    "required_parameters": ["hash"],
-    "description": "Retrieves a raw transaction by its hash."
-  },
-  {
-    "endpoint_group": "Raw Data",
-    "name": "Get Raw Block Transactions",
-    "path": "/1/raw/block-transactions",
-    "method": "GET",
-    "required_parameters": ["block_number"],
-    "description": "Get Raw Block Transactions"
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get All Cryptocurrencies",
-    "path": "/1/all",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves all cryptocurrencies."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Search by name",
-    "path": "/1/search",
-    "method": "GET",
-    "required_parameters": ["input"],
-    "description": "Searches for assets by name or symbol."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get Metadata",
-    "path": "/1/metadata",
-    "method": "GET",
-    "required_parameters": ["id"],
-    "description": "Retrieves metadata for a specific asset."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get Metadata (batch)",
-    "path": "/1/multi-metadata",
-    "method": "GET",
-    "required_parameters": ["ids"],
-    "description": "Retrieves metadata for multiple assets."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get Meta Trendings",
-    "path": "/1/metadata/trendings",
-    "method": "GET",
-    "required_parameters": [],
-    "optional_parameters": ["platform", "blockchain"],
-    "description": "Retrieves trending assets."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get All Categories",
-    "path": "/1/metadata/categories",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves all asset categories."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Get All Blockchains",
-    "path": "/1/blockchains",
-    "method": "GET",
-    "required_parameters": [],
-    "description": "Retrieves all supported blockchains."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Query Blockchain Tables",
-    "path": "/1/blockchain/query",
-    "method": "POST",
-    "required_parameters": ["query"],
-    "description": "Queries blockchain tables with SQL."
-  },
-  {
-    "endpoint_group": "Metacore",
-    "name": "Decode Blockchain Events",
-    "path": "/1/blockchain/decode",
-    "method": "POST",
-    "required_parameters": ["data", "topics"],
-    "description": "Decodes blockchain events."
-  },
-  {
-    "endpoint_group": "Misc",
-    "name": "Get Sparkline",
-    "path": "/1/sparklines",
-    "method": "GET",
-    "required_parameters": ["id"],
-    "description": "Retrieves sparkline data for an asset."
-  },
-  {
-    "endpoint_group": "Misc",
-    "name": "Get CeFi Funding Rate",
-    "path": "/1/market/cefi-funding-rate",
-    "method": "GET",
-    "required_parameters": ["instrument"],
-    "description": "Retrieves CeFi funding rate."
-  }
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Market Data",
+        "path": "/1/market/data",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "id",
+                "type": "integer",
+                "description": "ID of the asset (e.g., 'bitcoin')",
+                "example": "/1/market/data?id=1"
+            },
+            {
+                "name": "asset",
+                "type": "string",
+                "description": "Asset name (e.g., 'bitcoin')",
+                "example": "/1/market/data?asset=bitcoin"
+            },
+            {
+                "name": "symbol",
+                "type": "string",
+                "description": "Symbol of the asset (e.g., 'BTC')",
+                "example": "/1/market/data?symbol=BTC"
+            },
+             {
+                "name": "blockchain",
+                "type": "string",
+                "description": "Blockchain  (e.g., 'solana')",
+                "example": "/1/market/data?blockchain=solana"
+            }
+        ],
+        "description": "Retrieves market data for a specific asset."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Market Data (batch)",
+        "path": "/1/market/multi-data",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "ids",
+                "type": "integer[]",
+                "description": "IDs of the assets (e.g., '1,2')",
+                 "example": "/1/market/multi-data?ids=1,2"
+            },
+            {
+                "name": "assets",
+                "type": "string[]",
+                "description": "Asset names (e.g., 'bitcoin,ethereum')",
+                "example": "/1/market/multi-data?assets=bitcoin,ethereum"
+            },
+            {
+                "name": "symbols",
+                "type": "string[]",
+                "description": "Symbols of the assets (e.g., 'BTC,ETH')",
+                "example": "/1/market/multi-data?symbols=BTC,ETH"
+            },
+             {
+                "name": "blockchains",
+                "type": "string[]",
+                "description": "Blockchains  (e.g., 'solana,ethereum')",
+                "example": "/1/market/multi-data?blockchains=solana,ethereum"
+            }
+        ],
+        "description": "Retrieves market data for multiple assets in a single request."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Market Pair",
+        "path": "/1/market/pair",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "pair",
+                "type": "string",
+                "description": "Trading pair (e.g., 'ETH-BTC')",
+                "example": "/1/market/pair?pair=ETH-BTC"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves market data for a specific trading pair."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get All Pairs",
+        "path": "/1/market/pairs",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves all available trading pairs."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Pair Trades",
+        "path": "/1/market/trades-pair",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "pair",
+                "type": "string",
+                "description": "Trading pair (e.g., 'ETH-BTC')",
+                "example": "/1/market/trades-pair?pair=ETH-BTC"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves trades for a specific trading pair."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Historical Market Data",
+        "path": "/1/market/history",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "id",
+                "type": "integer",
+                "description": "ID of the asset (e.g., 'bitcoin')",
+                "example": "/1/market/history?id=1"
+            },
+            {
+                "name": "from",
+                "type": "integer",
+                "description": "Start timestamp (Unix)",
+                "example": "/1/market/history?from=1678886400"
+            },
+            {
+                "name": "to",
+                "type": "integer",
+                "description": "End timestamp (Unix)",
+                "example": "/1/market/history?to=1679062800"
+            }
+        ],
+        "description": "Retrieves historical market data for a specific asset."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Historical Market Data (batch)",
+        "path": "/1/market/multi-history",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "ids",
+                "type": "integer[]",
+                "description": "IDs of the assets (e.g., '1,2')",
+                "example": "/1/market/multi-history?ids=1,2"
+            },
+            {
+                "name": "froms",
+                "type": "integer[]",
+                "description": "Start timestamps (Unix) for each asset",
+                "example": "/1/market/multi-history?froms=1678886400,1678886400"
+            },
+            {
+                "name": "tos",
+                "type": "integer[]",
+                "description": "End timestamps (Unix) for each asset",
+                 "example": "/1/market/multi-history?tos=1679062800,1679062800"
+            },
+            {
+                "name": "symbols",
+                "type": "string[]",
+                "description": "Symbols of the assets (e.g., 'BTC,ETH')",
+                "example": "/1/market/multi-history?symbols=BTC,ETH"
+            },
+             {
+                "name": "assets",
+                "type": "string[]",
+                "description": "Assets names (e.g., 'bitcoin,ethereum')",
+                "example": "/1/market/multi-history?assets=bitcoin,ethereum"
+            },
+             {
+                "name": "blockchains",
+                "type": "string[]",
+                "description": "Blockchains  (e.g., 'solana,ethereum')",
+                "example": "/1/market/multi-history?blockchains=solana,ethereum"
+            },
+            {
+                "name": "period",
+                "type": "string",
+                "description": "Time period (e.g., '1h', '1d')",
+                "example": "/1/market/multi-history?period=1d"
+            }
+        ],
+        "description": "Retrieves historical market data for multiple assets."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Historical Pair Data (OHLCV)",
+        "path": "/1/market/history-pair",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "pair",
+                "type": "string",
+                "description": "Trading pair (e.g., 'ETH-BTC')",
+                 "example": "/1/market/history-pair?pair=ETH-BTC"
+            },
+            {
+                "name": "from",
+                "type": "integer",
+                "description": "Start timestamp (Unix)",
+                "example": "/1/market/history-pair?from=1678886400"
+            },
+            {
+                "name": "to",
+                "type": "integer",
+                "description": "End timestamp (Unix)",
+                "example": "/1/market/history-pair?to=1679062800"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves historical OHLCV data for a trading pair."
+    },
+     {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Query Asset Data",
+        "path": "/1/market/query",
+        "method": "GET",
+        "required_parameters": [],
+        "description": "Queries asset data with flexible filters."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Query Token Data",
+        "path": "/1/market/query/token",
+        "method": "GET",
+        "required_parameters": [],
+        "description": "Queries token data."
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Token Holders",
+        "path": "/1/market/token-holders",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "tokenAddress",
+                "type": "string",
+                "description": "Contract address of the token (e.g., '0x...')",
+                "example": "/1/market/token-holders?tokenAddress=0x1234567890abcdef"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves token holders for a contract address"
+    },
+    {
+        "endpoint_group": "Octopus - Market API",
+        "name": "Get Blockchain Pairs",
+        "path": "/1/market/blockchain-pairs",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "blockchain",
+                "type": "string",
+                "description": "Blockchain name (e.g., 'ethereum')",
+                "example": "/1/market/blockchain-pairs?blockchain=ethereum"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves pairs for a specific blockchain."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get NFTs Holdings",
+        "path": "/1/wallet/nfts",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/nfts?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves NFT holdings for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Historical Net Worth",
+        "path": "/1/wallet/history",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/history?wallet=0xabcdef1234567890"
+            },
+            {
+                "name": "from",
+                "type": "integer",
+                "description": "Start timestamp (Unix)",
+                 "example": "/1/wallet/history?wallet=0xabcdef1234567890&from=1678886400"
+            },
+            {
+                "name": "to",
+                "type": "integer",
+                "description": "End timestamp (Unix)",
+                "example": "/1/wallet/history?wallet=0xabcdef1234567890&to=1679062800"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves historical net worth for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Crypto Holdings",
+        "path": "/1/wallet/portfolio",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/portfolio?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves crypto holdings for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Crypto Holdings (batch)",
+        "path": "/1/wallet/multi-portfolio",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallets",
+                "type": "string[]",
+                "description": "Wallet addresses (e.g., '0x...,0x...')",
+                "example": "/1/wallet/multi-portfolio?wallets=0xabcdef1234567890,0x1234567890abcdef"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves crypto holdings for multiple wallets."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Defi-Positions Holdings",
+        "path": "/1/wallet/defi-positions",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g. '0x...')",
+                "example": "/1/wallet/defi-positions?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves DeFi positions for a wallet"
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Historical Transactions",
+        "path": "/1/wallet/transactions",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                 "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890"
+            },
+            {
+                "name": "from",
+                "type": "integer",
+                "description": "Start timestamp (Unix)",
+                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890&from=1678886400"
+            },
+            {
+                "name": "to",
+                "type": "integer",
+                "description": "End timestamp (Unix)",
+                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890&to=1679062800"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves historical transactions for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Transactions",
+        "path": "/1/wallet/raw-transactions",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/raw-transactions?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves raw transactions for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Token Transfers",
+        "path": "/1/wallet/token-transfers",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/token-transfers?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves token transfers for a wallet."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get NFTs Transfers",
+        "path": "/1/wallet/nft-transfers",
+        "method": "GET",
+        "required_parameters": [
+             {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/nft-transfers?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Get NFTs Transfers"
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Smart Money",
+        "path": "/1/wallet/smart-money",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves smart money wallets."
+    },
+    {
+        "endpoint_group": "[BETA] Wallet Explorer API",
+        "name": "Get Wallet Trades",
+        "path": "/1/wallet/trades",
+        "method": "GET",
+        "required_parameters": [
+             {
+                "name": "wallet",
+                "type": "string",
+                "description": "Wallet address (e.g., '0x...')",
+                "example": "/1/wallet/trades?wallet=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves trades for a wallet."
+    },
+    {
+        "endpoint_group": "Raw Data",
+        "name": "Get Raw Events",
+        "path": "/1/raw/events",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves raw events."
+    },
+    {
+        "endpoint_group": "Raw Data",
+        "name": "Get Raw Blocks",
+        "path": "/1/raw/block",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "blockchain",
+                "type": "string",
+                "description": "Blockchain name (e.g., 'ethereum')",
+                "example": "/1/raw/block?blockchain=ethereum"
+            },
+            {
+                "name": "blockId",
+                "type": "integer",
+                "description": "Block ID (e.g., '12345')",
+                "example": "/1/raw/block?blockId=12345"
+            }
+        ],
+        "description": "Retrieves raw blocks."
+    },
+    {
+        "endpoint_group": "Raw Data",
+        "name": "Get Raw Transaction",
+        "path": "/1/raw/transaction",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "hash",
+                "type": "string",
+                "description": "Transaction hash (e.g., '0x...')",
+                "example": "/1/raw/transaction?hash=0xabcdef1234567890"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves a raw transaction by its hash."
+    },
+    {
+        "endpoint_group": "Raw Data",
+        "name": "Get Raw Block Transactions",
+        "path": "/1/raw/block-transactions",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "block_number",
+                "type": "integer",
+                "description": "Block number (e.g., 12345)",
+                "example": "/1/raw/block-transactions?block_number=12345"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Get Raw Block Transactions"
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get All Cryptocurrencies",
+        "path": "/1/all",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves all cryptocurrencies."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Search by name",
+        "path": "/1/search",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "input",
+                "type": "string",
+                "description": "Search query (e.g., 'bitcoin')",
+                "example": "/1/search?input=bitcoin"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Searches for assets by name or symbol."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get Metadata",
+        "path": "/1/metadata",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "id",
+                "type": "integer",
+                "description": "Asset ID (e.g., '1')",
+                "example": "/1/metadata?id=1"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves metadata for a specific asset."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get Metadata (batch)",
+        "path": "/1/multi-metadata",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "ids",
+                "type": "integer[]",
+                "description": "Asset IDs (e.g., '1,2')",
+                "example": "/1/multi-metadata?ids=1,2"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Retrieves metadata for multiple assets."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get Meta Trendings",
+        "path": "/1/metadata/trendings",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [
+            {
+                "name": "platform",
+                "type": "string",
+                "description": "Platform (e.g., 'all', 'binance')",
+                "example": "/1/metadata/trendings?platform=all"
+            },
+            {
+                "name": "blockchain",
+                "type": "string",
+                "description": "Blockchain (e.g., 'all', 'solana')",
+                "example": "/1/metadata/trendings?blockchain=solana"
+            }
+        ],
+        "description": "Retrieves trending assets."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get All Categories",
+        "path": "/1/metadata/categories",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves all asset categories."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Get All Blockchains",
+        "path": "/1/blockchains",
+        "method": "GET",
+        "required_parameters": [],
+        "optional_parameters": [],
+        "description": "Retrieves all supported blockchains."
+    },
+    {
+        "endpoint_group": "Metacore",
+        "name": "Query Blockchain Tables",
+        "path": "/1/blockchain/query",
+        "method": "POST",
+        "required_parameters": [
+            {
+                "name": "query",
+                "type": "string",
+                "description": "SQL query (e.g., 'SELECT * FROM blocks LIMIT 10')",
+                "example": "/1/blockchain/query"
+            }
+        ],
+        "optional_parameters": [],
+        "description": "Queries blockchain tables with SQL."
+    },
+    {
+        "endpoint_group":"Metacore",
+        "name": "Decode Blockchain Events",
+        "path": "/1/blockchain/decode",
+        "method": "POST",
+        "required_parameters": [
+            {"name": "data",
+                "type": "string",
+                "description": "The event data, hex encoded (e.g., '0x...')",
+                "example": "/1/blockchain/decode",
+                "format": "hex"
+            },
+            {
+                "name": "topics",
+                "type": "string[]",
+                "description": "The event topics, hex encoded (e.g., ['0x...', '0x...'])",
+                "example": "/1/blockchain/decode",
+                "format": "hex"
+            }
+        ],
+        "description": "Decodes blockchain events."
+    },
+    {
+        "endpoint_group": "Misc",
+        "name": "Get Sparkline",
+        "path": "/1/sparklines",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "id",
+                "type": "integer",
+                "description": "ID of the asset (e.g., 'bitcoin')",
+                "example": "/1/sparklines?id=1"
+            }
+        ],
+        "description": "Retrieves sparkline data for an asset."
+    },
+    {
+        "endpoint_group": "Misc",
+        "name": "Get CeFi Funding Rate",
+        "path": "/1/market/cefi-funding-rate",
+        "method": "GET",
+        "required_parameters": [
+            {
+                "name": "instrument",
+                "type": "string",
+                "description": "The instrument name (e.g., 'BTC-USD-SWAP')",
+                "example": "/1/market/cefi-funding-rate?instrument=BTC-USD-SWAP"
+            }
+        ],
+        "description": "Retrieves CeFi funding rate."
+    }
 ]
