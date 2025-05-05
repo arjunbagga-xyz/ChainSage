@@ -108,7 +108,7 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         4.  Determine if a query is possible.
         5.  Generate a response, following these rules:
             * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
-            * If a query is not possible, return a JSON object explaining why and what information is missing.
+            * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead.
         
         Example 1:
         User Question: "What is the price of Bitcoin?"
