@@ -1,688 +1,2454 @@
 [
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Market Data",
-        "path": "/1/market/data",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "id",
-                "type": "integer",
-                "description": "ID of the asset (e.g., 'bitcoin')",
-                "example": "/1/market/data?id=1"
-            },
-            {
-                "name": "asset",
-                "type": "string",
-                "description": "Asset name (e.g., 'bitcoin')",
-                "example": "/1/market/data?asset=bitcoin"
-            },
-            {
-                "name": "symbol",
-                "type": "string",
-                "description": "Symbol of the asset (e.g., 'BTC')",
-                "example": "/1/market/data?symbol=BTC"
-            },
-             {
-                "name": "blockchain",
-                "type": "string",
-                "description": "Blockchain  (e.g., 'solana')",
-                "example": "/1/market/data?blockchain=solana"
-            }
-        ],
-        "description": "Retrieves market data for a specific asset."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Market Data (batch)",
-        "path": "/1/market/multi-data",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "ids",
-                "type": "integer[]",
-                "description": "IDs of the assets (e.g., '1,2')",
-                 "example": "/1/market/multi-data?ids=1,2"
-            },
-            {
-                "name": "assets",
-                "type": "string[]",
-                "description": "Asset names (e.g., 'bitcoin,ethereum')",
-                "example": "/1/market/multi-data?assets=bitcoin,ethereum"
-            },
-            {
-                "name": "symbols",
-                "type": "string[]",
-                "description": "Symbols of the assets (e.g., 'BTC,ETH')",
-                "example": "/1/market/multi-data?symbols=BTC,ETH"
-            },
-             {
-                "name": "blockchains",
-                "type": "string[]",
-                "description": "Blockchains  (e.g., 'solana,ethereum')",
-                "example": "/1/market/multi-data?blockchains=solana,ethereum"
-            }
-        ],
-        "description": "Retrieves market data for multiple assets in a single request."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Market Pair",
-        "path": "/1/market/pair",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "pair",
-                "type": "string",
-                "description": "Trading pair (e.g., 'ETH-BTC')",
-                "example": "/1/market/pair?pair=ETH-BTC"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves market data for a specific trading pair."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get All Pairs",
-        "path": "/1/market/pairs",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves all available trading pairs."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Pair Trades",
-        "path": "/1/market/trades-pair",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "pair",
-                "type": "string",
-                "description": "Trading pair (e.g., 'ETH-BTC')",
-                "example": "/1/market/trades-pair?pair=ETH-BTC"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves trades for a specific trading pair."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Historical Market Data",
-        "path": "/1/market/history",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "id",
-                "type": "integer",
-                "description": "ID of the asset (e.g., 'bitcoin')",
-                "example": "/1/market/history?id=1"
-            },
-            {
-                "name": "from",
-                "type": "integer",
-                "description": "Start timestamp (Unix)",
-                "example": "/1/market/history?from=1678886400"
-            },
-            {
-                "name": "to",
-                "type": "integer",
-                "description": "End timestamp (Unix)",
-                "example": "/1/market/history?to=1679062800"
-            }
-        ],
-        "description": "Retrieves historical market data for a specific asset."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Historical Market Data (batch)",
-        "path": "/1/market/multi-history",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "ids",
-                "type": "integer[]",
-                "description": "IDs of the assets (e.g., '1,2')",
-                "example": "/1/market/multi-history?ids=1,2"
-            },
-            {
-                "name": "froms",
-                "type": "integer[]",
-                "description": "Start timestamps (Unix) for each asset",
-                "example": "/1/market/multi-history?froms=1678886400,1678886400"
-            },
-            {
-                "name": "tos",
-                "type": "integer[]",
-                "description": "End timestamps (Unix) for each asset",
-                 "example": "/1/market/multi-history?tos=1679062800,1679062800"
-            },
-            {
-                "name": "symbols",
-                "type": "string[]",
-                "description": "Symbols of the assets (e.g., 'BTC,ETH')",
-                "example": "/1/market/multi-history?symbols=BTC,ETH"
-            },
-             {
-                "name": "assets",
-                "type": "string[]",
-                "description": "Assets names (e.g., 'bitcoin,ethereum')",
-                "example": "/1/market/multi-history?assets=bitcoin,ethereum"
-            },
-             {
-                "name": "blockchains",
-                "type": "string[]",
-                "description": "Blockchains  (e.g., 'solana,ethereum')",
-                "example": "/1/market/multi-history?blockchains=solana,ethereum"
-            },
-            {
-                "name": "period",
-                "type": "string",
-                "description": "Time period (e.g., '1h', '1d')",
-                "example": "/1/market/multi-history?period=1d"
-            }
-        ],
-        "description": "Retrieves historical market data for multiple assets."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Historical Pair Data (OHLCV)",
-        "path": "/1/market/history-pair",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "pair",
-                "type": "string",
-                "description": "Trading pair (e.g., 'ETH-BTC')",
-                 "example": "/1/market/history-pair?pair=ETH-BTC"
-            },
-            {
-                "name": "from",
-                "type": "integer",
-                "description": "Start timestamp (Unix)",
-                "example": "/1/market/history-pair?from=1678886400"
-            },
-            {
-                "name": "to",
-                "type": "integer",
-                "description": "End timestamp (Unix)",
-                "example": "/1/market/history-pair?to=1679062800"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves historical OHLCV data for a trading pair."
-    },
-     {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Query Asset Data",
-        "path": "/1/market/query",
-        "method": "GET",
-        "required_parameters": [],
-        "description": "Queries asset data with flexible filters."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Query Token Data",
-        "path": "/1/market/query/token",
-        "method": "GET",
-        "required_parameters": [],
-        "description": "Queries token data."
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Token Holders",
-        "path": "/1/market/token-holders",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "tokenAddress",
-                "type": "string",
-                "description": "Contract address of the token (e.g., '0x...')",
-                "example": "/1/market/token-holders?tokenAddress=0x1234567890abcdef"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves token holders for a contract address"
-    },
-    {
-        "endpoint_group": "Octopus - Market API",
-        "name": "Get Blockchain Pairs",
-        "path": "/1/market/blockchain-pairs",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "blockchain",
-                "type": "string",
-                "description": "Blockchain name (e.g., 'ethereum')",
-                "example": "/1/market/blockchain-pairs?blockchain=ethereum"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves pairs for a specific blockchain."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get NFTs Holdings",
-        "path": "/1/wallet/nfts",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/nfts?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves NFT holdings for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Historical Net Worth",
-        "path": "/1/wallet/history",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/history?wallet=0xabcdef1234567890"
-            },
-            {
-                "name": "from",
-                "type": "integer",
-                "description": "Start timestamp (Unix)",
-                 "example": "/1/wallet/history?wallet=0xabcdef1234567890&from=1678886400"
-            },
-            {
-                "name": "to",
-                "type": "integer",
-                "description": "End timestamp (Unix)",
-                "example": "/1/wallet/history?wallet=0xabcdef1234567890&to=1679062800"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves historical net worth for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Crypto Holdings",
-        "path": "/1/wallet/portfolio",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/portfolio?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves crypto holdings for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Crypto Holdings (batch)",
-        "path": "/1/wallet/multi-portfolio",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallets",
-                "type": "string[]",
-                "description": "Wallet addresses (e.g., '0x...,0x...')",
-                "example": "/1/wallet/multi-portfolio?wallets=0xabcdef1234567890,0x1234567890abcdef"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves crypto holdings for multiple wallets."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Defi-Positions Holdings",
-        "path": "/1/wallet/defi-positions",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g. '0x...')",
-                "example": "/1/wallet/defi-positions?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves DeFi positions for a wallet"
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Historical Transactions",
-        "path": "/1/wallet/transactions",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                 "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890"
-            },
-            {
-                "name": "from",
-                "type": "integer",
-                "description": "Start timestamp (Unix)",
-                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890&from=1678886400"
-            },
-            {
-                "name": "to",
-                "type": "integer",
-                "description": "End timestamp (Unix)",
-                "example": "/1/wallet/transactions?wallet=0xabcdef1234567890&to=1679062800"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves historical transactions for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Transactions",
-        "path": "/1/wallet/raw-transactions",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/raw-transactions?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves raw transactions for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Token Transfers",
-        "path": "/1/wallet/token-transfers",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/token-transfers?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves token transfers for a wallet."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get NFTs Transfers",
-        "path": "/1/wallet/nft-transfers",
-        "method": "GET",
-        "required_parameters": [
-             {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/nft-transfers?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Get NFTs Transfers"
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Smart Money",
-        "path": "/1/wallet/smart-money",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves smart money wallets."
-    },
-    {
-        "endpoint_group": "[BETA] Wallet Explorer API",
-        "name": "Get Wallet Trades",
-        "path": "/1/wallet/trades",
-        "method": "GET",
-        "required_parameters": [
-             {
-                "name": "wallet",
-                "type": "string",
-                "description": "Wallet address (e.g., '0x...')",
-                "example": "/1/wallet/trades?wallet=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves trades for a wallet."
-    },
-    {
-        "endpoint_group": "Raw Data",
-        "name": "Get Raw Events",
-        "path": "/1/raw/events",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves raw events."
-    },
-    {
-        "endpoint_group": "Raw Data",
-        "name": "Get Raw Blocks",
-        "path": "/1/raw/block",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "blockchain",
-                "type": "string",
-                "description": "Blockchain name (e.g., 'ethereum')",
-                "example": "/1/raw/block?blockchain=ethereum"
-            },
-            {
-                "name": "blockId",
-                "type": "integer",
-                "description": "Block ID (e.g., '12345')",
-                "example": "/1/raw/block?blockId=12345"
-            }
-        ],
-        "description": "Retrieves raw blocks."
-    },
-    {
-        "endpoint_group": "Raw Data",
-        "name": "Get Raw Transaction",
-        "path": "/1/raw/transaction",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "hash",
-                "type": "string",
-                "description": "Transaction hash (e.g., '0x...')",
-                "example": "/1/raw/transaction?hash=0xabcdef1234567890"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves a raw transaction by its hash."
-    },
-    {
-        "endpoint_group": "Raw Data",
-        "name": "Get Raw Block Transactions",
-        "path": "/1/raw/block-transactions",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "block_number",
-                "type": "integer",
-                "description": "Block number (e.g., 12345)",
-                "example": "/1/raw/block-transactions?block_number=12345"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Get Raw Block Transactions"
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get All Cryptocurrencies",
-        "path": "/1/all",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves all cryptocurrencies."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Search by name",
-        "path": "/1/search",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "input",
-                "type": "string",
-                "description": "Search query (e.g., 'bitcoin')",
-                "example": "/1/search?input=bitcoin"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Searches for assets by name or symbol."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get Metadata",
-        "path": "/1/metadata",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "id",
-                "type": "integer",
-                "description": "Asset ID (e.g., '1')",
-                "example": "/1/metadata?id=1"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves metadata for a specific asset."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get Metadata (batch)",
-        "path": "/1/multi-metadata",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "ids",
-                "type": "integer[]",
-                "description": "Asset IDs (e.g., '1,2')",
-                "example": "/1/multi-metadata?ids=1,2"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Retrieves metadata for multiple assets."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get Meta Trendings",
-        "path": "/1/metadata/trendings",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [
-            {
-                "name": "platform",
-                "type": "string",
-                "description": "Platform (e.g., 'all', 'binance')",
-                "example": "/1/metadata/trendings?platform=all"
-            },
-            {
-                "name": "blockchain",
-                "type": "string",
-                "description": "Blockchain (e.g., 'all', 'solana')",
-                "example": "/1/metadata/trendings?blockchain=solana"
-            }
-        ],
-        "description": "Retrieves trending assets."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get All Categories",
-        "path": "/1/metadata/categories",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves all asset categories."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Get All Blockchains",
-        "path": "/1/blockchains",
-        "method": "GET",
-        "required_parameters": [],
-        "optional_parameters": [],
-        "description": "Retrieves all supported blockchains."
-    },
-    {
-        "endpoint_group": "Metacore",
-        "name": "Query Blockchain Tables",
-        "path": "/1/blockchain/query",
-        "method": "POST",
-        "required_parameters": [
-            {
-                "name": "query",
-                "type": "string",
-                "description": "SQL query (e.g., 'SELECT * FROM blocks LIMIT 10')",
-                "example": "/1/blockchain/query"
-            }
-        ],
-        "optional_parameters": [],
-        "description": "Queries blockchain tables with SQL."
-    },
-    {
-        "endpoint_group":"Metacore",
-        "name": "Decode Blockchain Events",
-        "path": "/1/blockchain/decode",
-        "method": "POST",
-        "required_parameters": [
-            {"name": "data",
-                "type": "string",
-                "description": "The event data, hex encoded (e.g., '0x...')",
-                "example": "/1/blockchain/decode",
-                "format": "hex"
-            },
-            {
-                "name": "topics",
-                "type": "string[]",
-                "description": "The event topics, hex encoded (e.g., ['0x...', '0x...'])",
-                "example": "/1/blockchain/decode",
-                "format": "hex"
-            }
-        ],
-        "description": "Decodes blockchain events."
-    },
-    {
-        "endpoint_group": "Misc",
-        "name": "Get Sparkline",
-        "path": "/1/sparklines",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "id",
-                "type": "integer",
-                "description": "ID of the asset (e.g., 'bitcoin')",
-                "example": "/1/sparklines?id=1"
-            }
-        ],
-        "description": "Retrieves sparkline data for an asset."
-    },
-    {
-        "endpoint_group": "Misc",
-        "name": "Get CeFi Funding Rate",
-        "path": "/1/market/cefi-funding-rate",
-        "method": "GET",
-        "required_parameters": [
-            {
-                "name": "instrument",
-                "type": "string",
-                "description": "The instrument name (e.g., 'BTC-USD-SWAP')",
-                "example": "/1/market/cefi-funding-rate?instrument=BTC-USD-SWAP"
-            }
-        ],
-        "description": "Retrieves CeFi funding rate."
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Market Data",
+    "path": "/1/market/data",
+    "method": "GET",
+    "description": "Get market data for any crypto token. Input the asset name, symbol, or contract address (with blockchain).",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name (e.g., 'bitcoin') or contract address (e.g., '0x514910771af9ca656af840dff83e8264ecf986ca'). Required if 'symbol' or 'id' is not provided.",
+        "example": "/1/market/data?asset=bitcoin"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name (e.g., 'ethereum') or ID (e.g., '1'). Required if 'asset' is a contract address.",
+        "example": "/1/market/data?asset=0x514910771af9ca656af840dff83e8264ecf986ca&blockchain=1"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol (e.g., 'BTC'). Required if 'asset' or 'id' is not provided.",
+        "example": "/1/market/data?symbol=BTC"
+      },
+      {
+        "name": "id",
+        "type": "integer",
+        "description": "Asset ID (e.g., 1 for Bitcoin). Required if 'asset' or 'symbol' is not provided.",
+        "example": "/1/market/data?id=1"
+      }
+    ],
+    "response": {
+      "data": {
+        "id": 1,
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "decimals": 18,
+        "logo": "https://...",
+        "rank": 1,
+        "price": 65000.00,
+        "market_cap": 1280000000000,
+        "market_cap_diluted": 1365000000000,
+        "volume": 30000000000,
+        "volume_change_24h": -5.2,
+        "volume_7d": 210000000000,
+        "liquidity": 5000000000,
+        "ath": 73750.07,
+        "atl": 67.81,
+        "off_chain_volume": 29000000000,
+        "is_listed": true,
+        "price_change_1h": 0.1,
+        "price_change_24h": -1.5,
+        "price_change_7d": 2.3,
+        "price_change_1m": 5.0,
+        "price_change_1y": 120.5,
+        "total_supply": 21000000,
+        "circulating_supply": 19700000,
+        "contracts": [],
+        "native": null,
+        "priceNative": null
+      }
     }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Market Data (batch)",
+    "path": "/1/market/multi-data",
+    "method": "GET",
+    "description": "Retrieves market data for multiple assets in a single request. Supports querying by asset names, symbols, IDs, or contract addresses (with corresponding blockchains).",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "assets",
+        "type": "string[]",
+        "description": "Comma-separated list of asset names or contract addresses (e.g., 'bitcoin,0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0').",
+        "example": "/1/market/multi-data?assets=bitcoin,ethereum"
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs, corresponding to contract addresses in 'assets' (e.g., '1,137').",
+        "example": "/1/market/multi-data?assets=0x514910771af9ca656af840dff83e8264ecf986ca,0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&blockchains=1,1"
+      },
+      {
+        "name": "symbols",
+        "type": "string[]",
+        "description": "Comma-separated list of asset symbols (e.g., 'BTC,ETH'). Returns the asset with the highest market cap for each symbol.",
+        "example": "/1/market/multi-data?symbols=BTC,ETH"
+      },
+      {
+        "name": "ids",
+        "type": "integer[]",
+        "description": "Comma-separated list of asset IDs (e.g., '1,1027').",
+        "example": "/1/market/multi-data?ids=1,1027"
+      },
+      {
+        "name": "shouldFetchPriceChange",
+        "type": "string | boolean",
+        "description": "Specify if price change data should be fetched. E.g., '24h' or true/false. Default: false.",
+        "example": "/1/market/multi-data?symbols=BTC,ETH&shouldFetchPriceChange=24h"
+      }
+    ],
+    "response": {
+      "data": {
+        "bitcoin": {
+          "key": "bitcoin",
+          "id": 1,
+          "name": "Bitcoin",
+          "symbol": "BTC",
+          "decimals": 18,
+          "logo": "https://...",
+          "rank": 1,
+          "price": 65000.00,
+          "market_cap": 1280000000000,
+          "market_cap_diluted": 1365000000000,
+          "volume": 30000000000,
+          "volume_change_24h": -5.2,
+          "volume_7d": 210000000000,
+          "liquidity": 5000000000,
+          "ath": 73750.07,
+          "atl": 67.81,
+          "off_chain_volume": 29000000000,
+          "is_listed": true,
+          "price_change_1h": 0.1,
+          "price_change_24h": -1.5,
+          "price_change_7d": 2.3,
+          "price_change_1m": 5.0,
+          "price_change_1y": 120.5,
+          "total_supply": 21000000,
+          "circulating_supply": 19700000,
+          "contracts": []
+        },
+        "ethereum": {
+           "key": "ethereum",
+           "id": 1027,
+           "name": "Ethereum",
+           "symbol": "ETH",
+           "decimals": 18,
+           "logo": "https://...",
+           "rank": 2,
+           "price": 3500.00,
+           "market_cap": 420000000000,
+           "market_cap_diluted": 420000000000,
+           "volume": 15000000000,
+           "volume_change_24h": -3.1,
+           "volume_7d": 100000000000,
+           "liquidity": 4000000000,
+           "ath": 4878.26,
+           "atl": 0.432979,
+           "off_chain_volume": 14000000000,
+           "is_listed": true,
+           "price_change_1h": 0.2,
+           "price_change_24h": -2.0,
+           "price_change_7d": 1.8,
+           "price_change_1m": 8.0,
+           "price_change_1y": 90.0,
+           "total_supply": 120176931,
+           "circulating_supply": 120176931,
+           "contracts": []
+        }
+      },
+      "dataArray": [ /* Same data as above but in array format */ ]
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Market Pair",
+    "path": "/1/market/pair",
+    "method": "GET",
+    "description": "Retrieves data for a specific trading pair/pool address. Supports Uniswap V2/V3 forks, Balancer, TraderJoe, Camelot, SUI DEXes.",
+    "required_parameters": [
+       {
+        "name": "address",
+        "type": "string",
+        "description": "The contract address of the trading pair/pool.",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Recommended, mandatory for Balancer V2.",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum"
+      },
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name or contract address to specify which token's price perspective is needed ('price' and 'priceToken' fields).",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum&asset=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol to specify which token's price perspective is needed.",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum&symbol=WETH"
+      },
+       {
+        "name": "baseToken",
+        "type": "string",
+        "description": "Specify the base token address for price calculation.",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum&baseToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+      },
+      {
+        "name": "stats",
+        "type": "boolean",
+        "description": "Set to true to include detailed trade statistics (volume, fees, trades count) for various timeframes. Default: false.",
+        "example": "/1/market/pair?address=0x...&blockchain=ethereum&stats=true"
+      }
+    ],
+    "response": {
+      "data": {
+        "token0": { /* Details of token 0 */ },
+        "token1": { /* Details of token 1 */ },
+        "volume24h": 123456.78,
+        "liquidity": 987654.32,
+        "blockchain": "ethereum",
+        "address": "0x...",
+        "createdAt": "2023-01-01T12:00:00Z",
+        "type": "uniswap-v2",
+        "baseToken": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "exchange": { "name": "Uniswap V2", "logo": "https://..." },
+        "factory": "0x...",
+        "quoteToken": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "price": 3500.50,
+        "priceToken": 0.0002856,
+        "priceTokenString": "0.0002856",
+        /* Stats fields if stats=true */
+        "trades_1min": 5,
+        "buys_1min": 3,
+        "sells_1min": 2,
+        "volume_1min": 1000.0,
+        /* ... more stats for 5m, 15m, 1h, 4h, 12h, 24h */
+        "price_change_1min": 0.05,
+        "price_change_5min": 0.12,
+        /* ... more price changes */
+        "price_change_24h": -1.5
+      }
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get All Pairs",
+    "path": "/1/market/pairs",
+    "method": "GET",
+    "description": "Retrieves a list of all trading pairs for a given asset or blockchain, sorted by volume then liquidity. Supports pagination.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name, symbol, ID, or contract address to filter pairs for.",
+        "example": "/1/market/pairs?asset=bitcoin"
+      },
+       {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol to filter pairs for.",
+        "example": "/1/market/pairs?symbol=BTC"
+      },
+      {
+        "name": "id",
+        "type": "integer",
+        "description": "Asset ID to filter pairs for.",
+        "example": "/1/market/pairs?id=1"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID to filter pairs for. Required if 'asset' is a contract address.",
+        "example": "/1/market/pairs?blockchain=ethereum"
+      },
+       {
+        "name": "blockchains",
+        "type": "string",
+        "description": "Comma-separated list of blockchain names or IDs to filter pairs across multiple chains.",
+        "example": "/1/market/pairs?blockchains=ethereum,polygon"
+      },
+      {
+        "name": "tokens",
+        "type": "string",
+        "description": "Comma-separated list of token addresses to find pairs involving these specific tokens.",
+        "example": "/1/market/pairs?tokens=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2,0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48&blockchain=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of pairs to return per page. Default: 25.",
+        "example": "/1/market/pairs?asset=bitcoin&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of pairs to skip for pagination. Default: 0.",
+        "example": "/1/market/pairs?asset=bitcoin&limit=25&offset=25"
+      }
+    ],
+    "response": {
+      "data": {
+        "pairs": [
+          { /* Pair data structure similar to Get Market Pair */ }
+        ],
+        "total_count": 583
+      }
+    }
+  },
+   {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Pair Trades",
+    "path": "/1/market/trades/pair",
+    "method": "GET",
+    "description": "Retrieves recent trades for a specific pair address or the largest pair of a given asset. Supports filtering and sorting.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "address",
+        "type": "string",
+        "description": "The contract address of the trading pair/pool. Required if 'asset' is not provided.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum"
+      },
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name or contract address. If provided instead of 'address', returns trades for the largest pair of this asset. Requires 'blockchain' if it's a contract address.",
+        "example": "/1/market/trades/pair?asset=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&blockchain=ethereum"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Required if 'asset' is a contract address or if 'address' is provided.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol. Can be used instead of 'asset' or 'address'.",
+        "example": "/1/market/trades/pair?symbol=WETH&blockchain=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of trades to return.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of trades to skip for pagination. Default: 0.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum&limit=100&offset=100"
+      },
+      {
+        "name": "amount",
+        "type": "number",
+        "description": "Filter trades by minimum USD amount.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum&amount=1000"
+      },
+      {
+        "name": "sortBy",
+        "type": "string",
+        "description": "Field to sort by (e.g., 'date', 'token_amount_usd').",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum&sortBy=token_amount_usd"
+      },
+      {
+        "name": "sortOrder",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc'). Default: 'desc'.",
+        "example": "/1/market/trades/pair?address=0x...&blockchain=ethereum&sortBy=date&sortOrder=asc"
+      },
+      {
+        "name": "mode",
+        "type": "string",
+        "description": "Query mode ('pair' or 'asset'). Default: 'pair'. Defines if query uses pair address or asset identifier.",
+        "example": "/1/market/trades/pair?asset=weth&blockchain=ethereum&mode=asset"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "blockchain": "ethereum",
+          "hash": "0x...",
+          "pair": "0x...",
+          "date": 1678886400000,
+          "token_price_vs": 0.000285, /* Price of token vs the other token in the pair */
+          "token_price": 3500.0,    /* Price of token in USD */
+          "token_amount": 1.5,
+          "token_amount_vs": 5250.0,
+          "token_amount_usd": 5250.0,
+          "type": "buy", /* or 'sell' */
+          "sender": "0x...",
+          "token_amount_raw": "1500000000000000000",
+          "token_amount_raw_vs": "5250000000",
+          "operation": "swap"
+        }
+        /* ... more trades */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Historical Market Data",
+    "path": "/1/market/history",
+    "method": "GET",
+    "description": "Retrieves historical price, volume, and market cap data for a specific asset. Supports custom time ranges and granularity.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name, symbol, ID, or contract address.",
+        "example": "/1/market/history?asset=bitcoin"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Required if 'asset' is a contract address.",
+        "example": "/1/market/history?asset=0x514910771af9ca656af840dff83e8264ecf986ca&blockchain=1"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol.",
+        "example": "/1/market/history?symbol=BTC"
+      },
+      {
+        "name": "id",
+        "type": "integer",
+        "description": "Asset ID.",
+        "example": "/1/market/history?id=1"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp in milliseconds. Default: 0 (beginning of history).",
+        "example": "/1/market/history?asset=bitcoin&from=1672531200000" /* Jan 1, 2023 */
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp in milliseconds. Default: Current time.",
+        "example": "/1/market/history?asset=bitcoin&to=1675209600000" /* Feb 1, 2023 */
+      },
+       {
+        "name": "period",
+        "type": "string",
+        "description": "Data granularity ('5m', '15m', '1h', '6h', '1d'). Default varies based on range (5m for last 7d, 6h for last 30d, 1d otherwise).",
+        "example": "/1/market/history?asset=bitcoin&period=1h"
+      }
+    ],
+    "response": {
+      "data": {
+        "price_history": [ [1678886400000, 65000.0], [1678886700000, 65010.5] /* ... [timestamp_ms, price] */ ],
+        "volume_history": [ [1678886400000, 1000000.0], [1678886700000, 1005000.0] /* ... [timestamp_ms, volume] */ ],
+        "market_cap_history": [ [1678886400000, 1280000000000], [1678886700000, 1280200000000] /* ... [timestamp_ms, market_cap] */ ],
+        "market_cap_diluted_history": [ [1678886400000, 1365000000000], [1678886700000, 1365210000000] /* ... [timestamp_ms, diluted_market_cap] */ ],
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "blockchain": null, /* Or blockchain name if queried by contract */
+        "address": null /* Or contract address if queried by contract */
+      }
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Historical Market Data (batch)",
+    "path": "/1/market/multi-history",
+    "method": "GET",
+    "description": "Retrieves historical market data for multiple assets simultaneously.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "assets",
+        "type": "string[]",
+        "description": "Comma-separated list of asset names or contract addresses.",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum"
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs, corresponding to contract addresses in 'assets'.",
+        "example": "/1/market/multi-history?assets=0x514910771af9ca656af840dff83e8264ecf986ca,0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&blockchains=1,1"
+      },
+      {
+        "name": "symbols",
+        "type": "string[]",
+        "description": "Comma-separated list of asset symbols.",
+        "example": "/1/market/multi-history?symbols=BTC,ETH"
+      },
+      {
+        "name": "ids",
+        "type": "integer[]",
+        "description": "Comma-separated list of asset IDs.",
+        "example": "/1/market/multi-history?ids=1,1027"
+      },
+      {
+        "name": "from",
+        "type": "string",
+        "description": "Start timestamp in milliseconds (applied to all assets).",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum&from=1672531200000"
+      },
+       {
+        "name": "froms",
+        "type": "string",
+        "description": "Comma-separated list of start timestamps in milliseconds (one per asset).",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum&froms=1672531200000,1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "string",
+        "description": "End timestamp in milliseconds (applied to all assets).",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum&to=1675209600000"
+      },
+       {
+        "name": "tos",
+        "type": "string",
+        "description": "Comma-separated list of end timestamps in milliseconds (one per asset).",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum&tos=1675209600000,1675209600000"
+      },
+       {
+        "name": "period",
+        "type": "string",
+        "description": "Data granularity ('5m', '15m', '1h', '6h', '1d'). Applied to all assets.",
+        "example": "/1/market/multi-history?assets=bitcoin,ethereum&period=1d"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "price_history": [ /* Price history for asset 1 */ ],
+          "volume_history": [ /* Volume history for asset 1 */ ],
+          "market_cap_history": [ /* Market cap history for asset 1 */ ],
+          "market_cap_diluted_history": [ /* Diluted market cap history for asset 1 */ ],
+          "name": "Bitcoin",
+          "symbol": "BTC",
+          "address": null,
+          "id": 1
+        },
+        {
+          "price_history": [ /* Price history for asset 2 */ ],
+          "volume_history": [ /* Volume history for asset 2 */ ],
+          "market_cap_history": [ /* Market cap history for asset 2 */ ],
+          "market_cap_diluted_history": [ /* Diluted market cap history for asset 2 */ ],
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "address": null,
+          "id": 1027
+        }
+        /* ... more assets */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Historical Pair Data (OHLCV)",
+    "path": "/1/market/history/pair",
+    "method": "GET",
+    "description": "Retrieves historical Open, High, Low, Close, Volume (OHLCV) data for a specific trading pair/pool or the largest pair of an asset. Supports various resolutions.",
+    "required_parameters": [],
+    "optional_parameters": [
+       {
+        "name": "address",
+        "type": "string",
+        "description": "The contract address of the trading pair/pool. Required if 'asset' is not provided.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum"
+      },
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name or contract address. If provided instead of 'address', returns OHLCV for the largest pair of this asset. Requires 'blockchain' if it's a contract address.",
+        "example": "/1/market/history/pair?asset=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&blockchain=ethereum"
+      },
+       {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol. Can be used instead of 'asset' or 'address'.",
+        "example": "/1/market/history/pair?symbol=WETH&blockchain=ethereum"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Required if 'asset' is a contract address or if 'address' is provided.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum"
+      },
+       {
+        "name": "baseToken",
+        "type": "string",
+        "description": "Specify the base token address for price calculation.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&baseToken=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp in seconds or milliseconds.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&from=1672531200"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp in seconds or milliseconds.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&to=1675209600"
+      },
+      {
+        "name": "period",
+        "type": "string",
+        "description": "Resolution/granularity ('1s', '1min', '5min', '15min', '1h', '1d', '7d', '30d').",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&period=1h"
+      },
+      {
+        "name": "amount",
+        "type": "integer",
+        "description": "Maximum number of data points (candles) to return. Default: 1000. Has priority over from/to if timeframe exceeds amount.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&period=1h&amount=500"
+      },
+      {
+        "name": "usd",
+        "type": "boolean",
+        "description": "Set to false to get prices in the base token instead of USD. Default: true (USD).",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&usd=false"
+      },
+       {
+        "name": "latest",
+        "type": "boolean",
+        "description": "Fetch only the latest candle.",
+        "example": "/1/market/history/pair?address=0x...&blockchain=ethereum&latest=true"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "volume": 150000.0,
+          "open": 3500.0,
+          "high": 3510.5,
+          "low": 3495.0,
+          "close": 3505.0,
+          "time": 1678886400 /* Timestamp in seconds */
+        }
+        /* ... more candles */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Query Asset Data",
+    "path": "/1/market/query",
+    "method": "GET",
+    "description": "Allows SQL-like querying and filtering of asset market data across various criteria like market cap, volume, price change, categories, and blockchains.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "sortBy",
+        "type": "string",
+        "description": "Field to sort results by (e.g., 'market_cap', 'volume', 'price_change_24h').",
+        "example": "/1/market/query?sortBy=market_cap"
+      },
+      {
+        "name": "sortOrder",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc'). Default: 'desc'.",
+        "example": "/1/market/query?sortBy=volume&sortOrder=asc"
+      },
+      {
+        "name": "filters",
+        "type": "string",
+        "description": "JSON string for filtering results (e.g., '{\"market_cap\": {\"gte\": 1000000}}'). Supports operators like gte, lte, eq, contains.",
+        "example": "/1/market/query?filters={\"price_change_24h\": {\"gte\": 5}}"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Filter assets by a specific blockchain name or ID.",
+        "example": "/1/market/query?blockchain=solana"
+      },
+       {
+        "name": "blockchains",
+        "type": "string",
+        "description": "Comma-separated list to filter assets by multiple blockchains.",
+        "example": "/1/market/query?blockchains=ethereum,polygon"
+      },
+      {
+        "name": "categories",
+        "type": "string",
+        "description": "Comma-separated list to filter assets by categories.",
+        "example": "/1/market/query?categories=DeFi,Gaming"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of assets to return. Default: 20.",
+        "example": "/1/market/query?limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of assets to skip for pagination. Default: 0.",
+        "example": "/1/market/query?limit=20&offset=20"
+      }
+    ],
+    "response": [
+      {
+        "name": "Solana",
+        "logo": "https://...",
+        "symbol": "SOL",
+        "liquidity": 1500000000,
+        "market_cap": 60000000000,
+        "volume": 2000000000,
+        "off_chain_volume": 1800000000,
+        "price": 130.00,
+        "price_change_1h": 0.5,
+        "price_change_24h": 6.2,
+        "price_change_7d": 10.1,
+        "categories": ["Layer 1", "Smart Contracts"],
+        "contracts": [
+          {
+            "address": "So11111111111111111111111111111111111111112",
+            "blockchain": "Solana",
+            "blockchainId": "solana",
+            "decimals": 9
+          }
+        ],
+        "id": 5426,
+        "rank": 5
+      }
+      /* ... more assets */
+    ]
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Query Token Data",
+    "path": "/1/market/query/token",
+    "method": "GET",
+    "description": "Allows SQL-like querying and filtering specifically for token data (distinct from assets, focusing on contract-level details) based on criteria like volume, listing date, supply, and blockchain.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "sortField",
+        "type": "string",
+        "description": "Field to sort results by (e.g., 'volume_24h', 'listed_at'). Note: Use 'sortField' instead of 'sortBy' for this endpoint.",
+        "example": "/1/market/query/token?sortField=volume_24h"
+      },
+      {
+        "name": "sortOrder",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc'). Default: 'desc'.",
+        "example": "/1/market/query/token?sortField=listed_at&sortOrder=asc"
+      },
+      {
+        "name": "filters",
+        "type": "string",
+        "description": "JSON string for filtering results (e.g., '{\"volume_24h\": {\"gte\": 10000}}').",
+        "example": "/1/market/query/token?filters={\"blockchain\": \"ethereum\"}"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of tokens to return. Default: 20.",
+        "example": "/1/market/query/token?limit=50"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Filter tokens by a specific blockchain name or ID.",
+        "example": "/1/market/query/token?blockchain=polygon"
+      },
+       {
+        "name": "blockchains",
+        "type": "string",
+        "description": "Comma-separated list to filter tokens by multiple blockchains.",
+        "example": "/1/market/query/token?blockchains=arbitrum,optimism"
+      },
+      {
+        "name": "unlistedAssets",
+        "type": "boolean",
+        "description": "Include assets not listed/curated by Mobula. Default: false.",
+        "example": "/1/market/query/token?unlistedAssets=true"
+      }
+       // Note: sortBy parameter mentioned in docs seems incorrect, using sortField as per description
+    ],
+    "response": {
+      "data": [
+        {
+          "name": "ChainLink Token",
+          "logo": "https://...",
+          "symbol": "LINK",
+          "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+          "blockchain": "ethereum",
+          "decimals": 18,
+          "volume_24h": 150000000,
+          "listed_at": "2017-09-20T00:00:00Z",
+          "circulating_supply": "587099970",
+          "total_supply": "1000000000",
+          "coingecko_id": "chainlink",
+          "pairs": [
+             { /* Pair data structure similar to Get Market Pair */ }
+          ]
+        }
+        /* ... more tokens */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Token Holders",
+    "path": "/1/market/token/holders",
+    "method": "GET",
+    "description": "Retrieves a list of token holders for a specific asset (identified by name, symbol, ID, or contract address), including their balance and share of total supply. Supports pagination.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name, symbol, ID, or contract address.",
+        "example": "/1/market/token/holders?asset=uniswap"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Required if 'asset' is a contract address.",
+        "example": "/1/market/token/holders?asset=0x1f9840a85d5af5bf1d1762f925bdaddc4201f984&blockchain=ethereum"
+      },
+       {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol.",
+        "example": "/1/market/token/holders?symbol=UNI"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of holders to return per page. Max 100. Default: 20.",
+        "example": "/1/market/token/holders?asset=uniswap&limit=100"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of holders to skip for pagination. Default: 0.",
+        "example": "/1/market/token/holders?asset=uniswap&limit=100&offset=100"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "address": "0x...",
+          "amountRaw": "1000000000000000000000", /* Raw balance */
+          "amount": 1000.0,                     /* Formatted balance */
+          "chainId": "1",                       /* EVM Chain ID */
+          "totalSupplyShare": 0.1,              /* Percentage of total supply */
+          "amountUSD": 5000.0                   /* USD value of balance */
+        }
+        /* ... more holders */
+      ],
+      "total_count": 150000 /* Total number of holders */
+    }
+  },
+  {
+    "endpoint_group": "Octopus - Market API",
+    "name": "Get Blockchain Pairs",
+    "path": "/1/market/blockchain/pairs",
+    "method": "GET",
+    "description": "Retrieves pairs newly created or with recent activity on specified blockchains, with detailed stats and filtering/sorting options. Useful for finding new/trending pairs.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Filter pairs by a specific blockchain name or ID.",
+        "example": "/1/market/blockchain/pairs?blockchain=base"
+      },
+      {
+        "name": "blockchains",
+        "type": "string",
+        "description": "Comma-separated list to filter pairs by multiple blockchains.",
+        "example": "/1/market/blockchain/pairs?blockchains=ethereum,arbitrum"
+      },
+      {
+        "name": "sortBy",
+        "type": "string",
+        "description": "Field to sort results by (e.g., 'latest_trade_date', 'volume_24h', 'price_change_24h', 'created_at', 'liquidity'). Default: 'latest_trade_date'.",
+        "example": "/1/market/blockchain/pairs?blockchain=base&sortBy=created_at"
+      },
+      {
+        "name": "sortOrder",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc'). Default: 'desc'.",
+        "example": "/1/market/blockchain/pairs?blockchain=base&sortBy=volume_24h&sortOrder=asc"
+      },
+      {
+        "name": "factory",
+        "type": "string",
+        "description": "Filter pairs by a specific DEX factory address.",
+        "example": "/1/market/blockchain/pairs?blockchain=ethereum&factory=0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f" /* Uniswap V2 Factory */
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of pairs to return per page. Max 100. Default: 100.",
+        "example": "/1/market/blockchain/pairs?blockchain=base&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of pairs to skip for pagination. Default: 0.",
+        "example": "/1/market/blockchain/pairs?blockchain=base&limit=100&offset=100"
+      },
+      {
+        "name": "filters",
+        "type": "string",
+        "description": "JSON string for advanced filtering on fields like 'liquidity', 'volume_24h', 'price_change_24h', etc. (e.g., '{\"liquidity\": {\"gte\": 10000}}'). See endpoint docs for available fields.",
+        "example": "/1/market/blockchain/pairs?blockchain=base&filters={\"volume_24h\": {\"gte\": 50000}}"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "price": 0.001,
+          "price_change_5min": 1.2,
+          "price_change_1h": 5.5,
+          "price_change_4h": 15.0,
+          "price_change_24h": 30.2,
+          "last_trade": "2024-05-06T10:00:00Z",
+          "created_at": "2024-05-05T14:30:00Z",
+          "holders_count": 500,
+          "volume_1min": 100.0,
+          /* ... more volume stats */
+          "volume_24h": 75000.0,
+          "trades_1min": 2,
+          /* ... more trade stats */
+          "trades_24h": 1200,
+          "liquidity": 25000.0,
+          "pair": { /* Pair data structure similar to Get Market Pair */ }
+        }
+        /* ... more pairs */
+      ],
+      "factories": { /* Dictionary of factories found */ }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get NFTs Holdings",
+    "path": "/1/wallet/nfts",
+    "method": "GET",
+    "description": "Retrieves NFT holdings for a given wallet address across specified blockchains. Supports pagination.",
+    "required_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "The wallet address to query.",
+        "example": "/1/wallet/nfts?wallet=0x..."
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "blockchains",
+        "type": "string",
+        "description": "Comma-separated list of blockchain names or IDs to filter by.",
+        "example": "/1/wallet/nfts?wallet=0x...&blockchains=ethereum,polygon"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of NFTs to return per page. Default: 100.",
+        "example": "/1/wallet/nfts?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of NFTs to skip for pagination. Default: 0.",
+        "example": "/1/wallet/nfts?wallet=0x...&limit=100&offset=100"
+      },
+       {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number for pagination (alternative to offset). Default: 1.",
+        "example": "/1/wallet/nfts?wallet=0x...&limit=100&page=2"
+      },
+       {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details in the response. Default: false.",
+        "example": "/1/wallet/nfts?wallet=0x...&pagination=true"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "token_address": "0x...",
+          "token_id": "1234",
+          "token_uri": "https://...",
+          "amount": "1",
+          "owner_of": "0x...",
+          "name": "Cool NFT",
+          "symbol": "COOL",
+          "blockchain": "ethereum",
+          "chain_id": "1"
+        }
+        /* ... more NFTs */
+      ],
+      "pagination": { /* Included if pagination=true */
+        "total": 50,
+        "page": 1,
+        "offset": 0,
+        "limit": 100
+      }
+    }
+  },
+   {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Historical Net Worth",
+    "path": "/1/wallet/history",
+    "method": "GET",
+    "description": "Retrieves the historical total net worth (USD balance) of one or more wallet addresses across specified blockchains.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address to query.",
+        "example": "/1/wallet/history?wallet=0x..."
+      },
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/history?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs to include.",
+        "example": "/1/wallet/history?wallet=0x...&blockchains=ethereum,polygon"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp in milliseconds.",
+        "example": "/1/wallet/history?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp in milliseconds.",
+        "example": "/1/wallet/history?wallet=0x...&to=1675209600000"
+      },
+      {
+        "name": "period",
+        "type": "string",
+        "description": "Data granularity ('5m', '15m', '1h', '6h', '1d').",
+        "example": "/1/wallet/history?wallet=0x...&period=1d"
+      },
+       {
+        "name": "accuracy",
+        "type": "boolean",
+        "description": "Set to true to analyze all assets, including those <1% of net worth. Default: false (skips small assets for performance).",
+        "example": "/1/wallet/history?wallet=0x...&accuracy=true"
+      }
+      /* Other less common parameters like portfolio, pnl, cache, stale, recheck_contract, portfolio_settings, unlistedAssets, testnet, minliq, filterSpam exist but are less documented */
+    ],
+    "response": {
+      "data": {
+        "wallets": ["0x..."],
+        "balance_usd": 12345.67, /* Current total balance */
+        "balance_history": [
+          [1678886400000, 12000.0],
+          [1678886700000, 12010.5]
+          /* ... [timestamp_ms, balance_usd] */
+        ]
+      }
+    }
+  },
+   {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Crypto Holdings",
+    "path": "/1/wallet/portfolio",
+    "method": "GET",
+    "description": "Retrieves detailed crypto asset holdings for a single wallet address, including balances across chains, USD value, allocation, and optional PnL data.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address to query.",
+        "example": "/1/wallet/portfolio?wallet=0x..."
+      },
+       /* Note: 'wallets' parameter is listed but seems redundant with 'wallet' for a single portfolio endpoint */
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs to include.",
+        "example": "/1/wallet/portfolio?wallet=0x...&blockchains=ethereum,polygon"
+      },
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Filter holdings for a specific asset (name, symbol, ID, or contract address).",
+        "example": "/1/wallet/portfolio?wallet=0x...&asset=bitcoin"
+      },
+      {
+        "name": "pnl",
+        "type": "boolean",
+        "description": "Set to true to include Profit and Loss (PnL) calculations (realized, unrealized, historical).",
+        "example": "/1/wallet/portfolio?wallet=0x...&pnl=true"
+      },
+      {
+        "name": "accuracy",
+        "type": "boolean",
+        "description": "Set to true to analyze all assets, including those <1% of net worth. Default: false.",
+        "example": "/1/wallet/portfolio?wallet=0x...&accuracy=true"
+      }
+      /* Other less common parameters exist: portfolio, cache, stale, recheck_contract, from, to, portfolio_settings, unlistedAssets, period, testnet, liqmin, filterSpam */
+    ],
+    "response": {
+      "data": {
+        "total_wallet_balance": 12345.67,
+        "wallets": ["0x..."],
+        "assets": [
+          {
+            "contracts_balances": [ /* Balance details per contract/chain */ ],
+            "cross_chain_balances": { /* Balances aggregated by chain ID */ },
+            "price_change_24h": -1.5,
+            "estimated_balance": 5000.50, /* Total USD value for this asset */
+            "price": 65000.00,
+            "token_balance": 0.07693, /* Total token amount across chains */
+            "allocation": 40.5, /* Percentage of total portfolio */
+            "asset": { /* Asset metadata */ },
+            "wallets": ["0x..."], /* Wallets holding this asset */
+            "realized_pnl": 150.0, /* If pnl=true */
+            "unrealized_pnl": 300.0, /* If pnl=true */
+            "price_bought": 60000.0, /* Average buy price if pnl=true */
+            "total_invested": 4615.8, /* Total USD invested if pnl=true */
+            "min_buy_price": 58000.0, /* If pnl=true */
+            "max_buy_price": 62000.0 /* If pnl=true */
+          }
+          /* ... more assets */
+        ],
+        "pnl_history": { /* Historical PnL data if pnl=true */ },
+        "total_realized_pnl": 500.0, /* If pnl=true */
+        "total_unrealized_pnl": 800.0, /* If pnl=true */
+        "total_pnl_history": { /* Summary PnL for periods if pnl=true */ },
+        "balances_length": 15 /* Number of assets held */
+      }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Crypto Holdings (batch)",
+    "path": "/1/wallet/multi-portfolio",
+    "method": "GET",
+    "description": "Retrieves aggregated crypto asset holdings for multiple wallet addresses combined into a single portfolio view.",
+    "required_parameters": [],
+    "optional_parameters": [
+       /* Parameters are largely the same as /1/wallet/portfolio, but 'wallets' is used instead of 'wallet' */
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses to aggregate.",
+        "example": "/1/wallet/multi-portfolio?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/multi-portfolio?wallets=0x...,0x...&blockchains=ethereum"
+      },
+      {
+        "name": "pnl",
+        "type": "boolean",
+        "description": "Include Profit and Loss (PnL) calculations for the combined portfolio.",
+        "example": "/1/wallet/multi-portfolio?wallets=0x...,0x...&pnl=true"
+      }
+      /* Other parameters similar to /1/wallet/portfolio */
+    ],
+    "response": {
+       /* Response structure is identical to /1/wallet/portfolio, but data represents the aggregate of all specified wallets */
+      "data": {
+        "total_wallet_balance": 25000.00,
+        "wallets": ["0x...", "0x..."],
+        "assets": [ /* Aggregated assets */ ],
+        /* ... other fields similar to single portfolio */
+      }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Defi-Positions Holdings",
+    "path": "/1/wallet/defi-positions",
+    "method": "GET",
+    "description": "Retrieves DeFi positions (e.g., liquidity pools, staking, lending) for one or more wallet addresses across specified chains. Currently supports Uniswap V2.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/defi-positions?wallet=0x..."
+      },
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/defi-positions?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/defi-positions?wallet=0x...&blockchains=ethereum"
+      }
+      /* Other less common parameters: testnet, unlistedAssets */
+    ],
+    "response": {
+      "data": [
+        {
+          "protocol": { /* Protocol details (e.g., Uniswap V2) */ },
+          "positions": [
+            {
+              "type": "liquidity_pool", /* Or 'staking', 'lending', etc. */
+              "name": "ETH/USDC Pool",
+              "chain_id": "1",
+              "contract": "0x...", /* LP token or position contract */
+              "created_at": "2023-02-15T...",
+              "tokens": [ /* Underlying tokens in the position */ ],
+              "rewards": [ /* Claimable reward tokens */ ],
+              "extra": { /* Position-specific details */
+                 "lp_token_amount": "1.234",
+                 "share_of_pool": "0.05",
+                 "health_factor": 1.5 /* For lending positions */
+              }
+            }
+            /* ... more positions */
+          ]
+        }
+        /* ... more protocols */
+      ],
+      "wallets": ["0x..."]
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Historical Transactions",
+    "path": "/1/wallet/transactions",
+    "method": "GET",
+    "description": "Retrieves a history of decoded transactions (e.g., swaps, transfers) for one or more wallets across specified blockchains. Supports pagination and filtering.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/transactions?wallet=0x..."
+      },
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/transactions?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/transactions?wallet=0x...&blockchains=ethereum,polygon"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of transactions per page.",
+        "example": "/1/wallet/transactions?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of transactions to skip.",
+        "example": "/1/wallet/transactions?wallet=0x...&limit=100&offset=100"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number (alternative to offset).",
+        "example": "/1/wallet/transactions?wallet=0x...&limit=100&page=2"
+      },
+      {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc') by timestamp.",
+        "example": "/1/wallet/transactions?wallet=0x...&order=asc"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp in milliseconds.",
+        "example": "/1/wallet/transactions?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp in milliseconds.",
+        "example": "/1/wallet/transactions?wallet=0x...&to=1675209600000"
+      },
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Filter transactions involving a specific asset.",
+        "example": "/1/wallet/transactions?wallet=0x...&asset=uniswap"
+      },
+      {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details in the response.",
+        "example": "/1/wallet/transactions?wallet=0x...&pagination=true"
+      }
+      /* Other parameters: cache, stale, recheckContract, trades, transactions, unlistedAssets, onlyAssets */
+    ],
+    "response": {
+      "data": {
+        "transactions": [
+          {
+            "id": "...",
+            "timestamp": 1678886400000,
+            "from": "0x...",
+            "to": "0x...", /* Can be contract address for interactions */
+            "contract": "0x...", /* Token contract if applicable */
+            "hash": "0x...",
+            "amount_usd": 1000.0,
+            "amount": 0.5,
+            "block_number": 17000000,
+            "type": "swap", /* Or 'transfer', 'receive', 'send' etc. */
+            "blockchain": "ethereum",
+            "tx_cost": 5.50, /* Gas cost in USD */
+            "transaction": { /* Raw transaction details */ },
+            "asset": { /* Asset metadata */ }
+          }
+          /* ... more transactions */
+        ],
+        "wallets": ["0x..."]
+      },
+      "details": null, /* Potentially used for errors or extra info */
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Transactions (Raw/Unified)",
+    "path": "/1/wallet/raw-transactions",
+    "method": "GET",
+    "description": "Retrieves raw and unified native transaction data (e.g., ETH, SOL transfers, not token transfers) for specified wallets across supported chains.",
+    "required_parameters": [],
+    "optional_parameters": [
+       {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/raw-transactions?wallet=0x..."
+      },
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/raw-transactions?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&blockchains=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of transactions per page.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of transactions to skip.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&limit=100&offset=100"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&limit=100&page=2"
+      },
+      {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc').",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&order=asc"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&to=1675209600000"
+      },
+      {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details.",
+        "example": "/1/wallet/raw-transactions?wallet=0x...&pagination=true"
+      }
+      /* Other parameters: cache, stale */
+    ],
+    "response": {
+      "raw": [ /* Raw transaction data, similar structure to /wallet/transactions */ ],
+      "unified": [ /* Simplified/unified transaction view */
+        {
+          "chain_id": "1",
+          "hash": "0x...",
+          "method": "Transfer", /* Or method name if contract interaction */
+          "from": "0x...",
+          "to": "0x...",
+          "native_amount": "1000000000000000000", /* Amount in native currency (e.g., Wei for ETH) */
+          "name": "Ethereum",
+          "logo": "https://...",
+          "amount": "1.0", /* Formatted native amount */
+          "token": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", /* Native token address */
+          "symbol": "ETH",
+          "timestamp": "2024-05-06T...",
+          "block_number": 17000001,
+          "txn_fees": "21000000000000", /* Fees in native currency */
+          "status": true
+        }
+      ],
+      "wallets": ["0x..."],
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+   {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Token Transfers",
+    "path": "/1/wallet/token-transfers",
+    "method": "GET",
+    "description": "Retrieves raw and unified token transfer data (e.g., ERC-20, BEP-20, *not* native transfers) for specified wallets across supported chains.",
+    "required_parameters": [],
+    "optional_parameters": [
+      /* Parameters are identical to /1/wallet/raw-transactions */
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/token-transfers?wallet=0x..."
+      },
+       {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/token-transfers?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&blockchains=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Limit per page.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Offset for pagination.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&offset=50"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&page=2"
+      },
+       {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc').",
+        "example": "/1/wallet/token-transfers?wallet=0x...&order=asc"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&to=1675209600000"
+      },
+       {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details.",
+        "example": "/1/wallet/token-transfers?wallet=0x...&pagination=true"
+      }
+       /* Other parameters: cache, stale */
+    ],
+    "response": {
+      "raw": [ /* Raw token transfer data, similar structure to /wallet/transactions */ ],
+      "unified": [ /* Simplified/unified token transfer view */
+        {
+          "chain_id": "1",
+          "hash": "0x...",
+          "method": "Transfer",
+          "from": "0x...",
+          "to": "0x...",
+          "native_amount": "0", /* Native amount is 0 for token transfers */
+          "name": "Uniswap",
+          "logo": "https://...",
+          "amount": "100.0", /* Formatted token amount */
+          "token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984", /* Token contract address */
+          "symbol": "UNI",
+          "timestamp": "2024-05-06T...",
+          "block_number": 17000002,
+          "txn_fees": "25000000000000",
+          "status": true
+        }
+      ],
+      "wallets": ["0x..."],
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get NFTs Transfers",
+    "path": "/1/wallet/nft-transfers",
+    "method": "GET",
+    "description": "Retrieves raw and unified NFT transfer data (e.g., ERC-721, ERC-1155) for specified wallets across supported EVM chains.",
+     "required_parameters": [],
+    "optional_parameters": [
+      /* Parameters are identical to /1/wallet/raw-transactions */
+       {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/nft-transfers?wallet=0x..."
+      },
+       {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/nft-transfers?wallets=0x...,0x..."
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&blockchains=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Limit per page.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Offset for pagination.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&offset=50"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&page=2"
+      },
+       {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc').",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&order=asc"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&to=1675209600000"
+      },
+       {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details.",
+        "example": "/1/wallet/nft-transfers?wallet=0x...&pagination=true"
+      }
+       /* Other parameters: cache, stale */
+    ],
+    "response": {
+      "raw": [ /* Raw NFT transfer data */
+        {
+          "combined_id": "...",
+          "combined_date": "...",
+          "contract_address": "0x...",
+          "from_address": "0x...",
+          "to_address": "0x...",
+          "chain_id": "1",
+          "token_id": "1234",
+          "fees": "30000000000000",
+          "fees_usd": 7.50,
+          "block_height": 17000003,
+          "transaction_hash": "0x...",
+          "raw_type": "buy" /* Or 'sell' */
+        }
+      ],
+      "unified": [ /* Simplified/unified NFT transfer view */
+        {
+          "chain_id": "1",
+          "hash": "0x...",
+          "method": "Transfer", /* Or specific marketplace method */
+          "from": "0x...",
+          "to": "0x...",
+          "amount": "1", /* Typically 1 for ERC-721 */
+          "token": "0x...", /* NFT contract address */
+          "symbol": "COOL",
+          "tokenId": "1234",
+          "timestamp": "2024-05-06T...",
+          "block_number": 17000003,
+          "txn_fees": "30000000000000",
+          "status": true
+        }
+      ],
+      "wallets": ["0x..."],
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Smart Money",
+    "path": "/1/wallet/smart-money",
+    "method": "GET",
+    "description": "Retrieves a list of 'smart money' wallets based on profitability metrics like PnL, win rate, and volume.",
+    "required_parameters": [],
+    "optional_parameters": [
+        /* No specific query parameters listed in the docs */
+    ],
+    "response": {
+      "data": [
+        {
+          "wallet_address": "0x...",
+          "realized_pnl": 150000.0,
+          "unrealized_pnl": 50000.0,
+          "txns_count": 500,
+          "volume": 2000000.0,
+          "blockchains": ["ethereum", "arbitrum"],
+          "win_rate": 65.5, /* Percentage */
+          "tokens_distribution": { /* PnL distribution brackets */
+            "10x+": 5,
+            "4x - 10x": 10,
+            "2x - 4x": 20,
+            "10% - 2x": 30,
+            "-10% - 10%": 15,
+            "-50% - -10%": 10,
+            "-100% - -50%": 10
+          },
+          "top_3_tokens": [ /* Top performing tokens by PnL */
+             {"symbol": "TOKEN1", "pnl": 50000},
+             {"symbol": "TOKEN2", "pnl": 30000},
+             {"symbol": "TOKEN3", "pnl": 20000}
+          ]
+        }
+        /* ... more smart money wallets */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "[BETA] Wallet Explorer API",
+    "name": "Get Wallet Trades",
+    "path": "/1/wallet/trades",
+    "method": "GET",
+    "description": "Retrieves DEX swap trades executed by one or more wallet addresses.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "wallet",
+        "type": "string",
+        "description": "Single wallet address.",
+        "example": "/1/wallet/trades?wallet=0x..."
+      },
+      {
+        "name": "wallets",
+        "type": "string[]",
+        "description": "Comma-separated list of wallet addresses.",
+        "example": "/1/wallet/trades?wallets=0x...,0x..."
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of trades per page. Default: 100.",
+        "example": "/1/wallet/trades?wallet=0x...&limit=50"
+      },
+      {
+        "name": "offset",
+        "type": "integer",
+        "description": "Number of trades to skip. Default: 0.",
+        "example": "/1/wallet/trades?wallet=0x...&limit=100&offset=100"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number. Default: 1.",
+        "example": "/1/wallet/trades?wallet=0x...&limit=100&page=2"
+      },
+      {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('asc' or 'desc') by date.",
+        "example": "/1/wallet/trades?wallet=0x...&order=asc"
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start timestamp in milliseconds.",
+        "example": "/1/wallet/trades?wallet=0x...&from=1672531200000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End timestamp in milliseconds.",
+        "example": "/1/wallet/trades?wallet=0x...&to=1675209600000"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "chain_id": "1",
+          "swap_type": "buy", /* Or 'sell' */
+          "raw_amount0": "1000000000000000000", /* Raw amount of token 0 */
+          "raw_amount1": "3500000000", /* Raw amount of token 1 */
+          "amount0": "1.0", /* Formatted amount of token 0 */
+          "amount1": "3500.0", /* Formatted amount of token 1 */
+          "ratio": 3500.0, /* Price ratio between tokens */
+          "price_usd_token0": 3500.0, /* USD price of token 0 at trade time */
+          "price_usd_token1": 1.0, /* USD price of token 1 at trade time */
+          "date": "2024-05-06T...",
+          "amount_usd": 3500.0, /* USD value of the trade */
+          "pool_address": "0x...",
+          "token0_address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", /* WETH */
+          "token1_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", /* USDC */
+          "transaction_sender_address": "0x..." /* Wallet address that initiated */
+        }
+        /* ... more trades */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Raw Data",
+    "name": "Get Raw Events",
+    "path": "/2/events",
+    "method": "GET",
+    "description": "Retrieves paginated raw blockchain event logs. Supports filtering by block range, address, and event topic (log signature).",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID.",
+        "example": "/2/events?blockchain=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of events per page.",
+        "example": "/2/events?blockchain=ethereum&limit=50"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number.",
+        "example": "/2/events?blockchain=ethereum&limit=100&page=2"
+      },
+       {
+        "name": "hash",
+        "type": "string",
+        "description": "Filter events by transaction hash.",
+        "example": "/2/events?blockchain=ethereum&hash=0x..."
+      },
+      {
+        "name": "from",
+        "type": "integer",
+        "description": "Start block number.",
+        "example": "/2/events?blockchain=ethereum&from=17000000"
+      },
+      {
+        "name": "to",
+        "type": "integer",
+        "description": "End block number.",
+        "example": "/2/events?blockchain=ethereum&to=17000100"
+      },
+      {
+        "name": "address",
+        "type": "string",
+        "description": "Filter events emitted by a specific contract address.",
+        "example": "/2/events?blockchain=ethereum&address=0x..."
+      },
+      {
+        "name": "log",
+        "type": "string",
+        "description": "Filter by event topic signature (e.g., topic0 for Transfer event: 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef).",
+        "example": "/2/events?blockchain=ethereum&log=0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
+      },
+       {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details.",
+        "example": "/2/events?blockchain=ethereum&pagination=true"
+      }
+    ],
+    "response": {
+      "raw": [
+        {
+          "chain_id": "1",
+          "block_number": "17000000",
+          "transaction_hash": "0x...",
+          "log_index": 10,
+          "address": "0x...", /* Contract emitting the event */
+          "block_hash": "0x...",
+          "data": "0x...", /* Non-indexed event parameters */
+          "topic0": "0xddf252ad...", /* Event signature */
+          "topic1": "0x... (from address)", /* Indexed parameter 1 */
+          "topic2": "0x... (to address)", /* Indexed parameter 2 */
+          "topic3": "0x... (token ID)", /* Indexed parameter 3 */
+          "timestamp": "1678886400",
+          "transaction_index": 5
+        }
+        /* ... more events */
+      ],
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+  {
+    "endpoint_group": "Raw Data",
+    "name": "Get Raw Blocks",
+    "path": "/2/blocks/specific",
+    "method": "GET",
+    "description": "Retrieves raw and unified/formatted data for a specific block, identified by number or hash.",
+    "required_parameters": [
+       {
+        "name": "blockId",
+        "type": "string",
+        "description": "Block number or block hash.",
+        "example": "/2/blocks/specific?blockId=17000000&blockchain=ethereum"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID.",
+        "example": "/2/blocks/specific?blockId=17000000&blockchain=ethereum"
+      }
+    ],
+    "response": {
+      "raw": [ /* Raw block data (structure varies by chain) */
+        {
+          "chain_id": "1",
+          "number": "17000000",
+          "author": "0x...", /* Miner/validator */
+          "hash": "0x...",
+          "parent_hash": "0x...",
+          "timestamp": "1678886400",
+          "transactions": ["0x...", "0x..."],
+          "gas_used": "15000000"
+          /* ... other chain-specific fields */
+        }
+      ],
+      "unified": [ /* Formatted block data for display */
+        { "label": "Block Height", "value": "17000000", "link": "/block/17000000", "hasCopy": false },
+        { "label": "Timestamp", "value": "Mar 15, 2023 ...", "tooltip": "1678886400" },
+        { "label": "Transactions", "value": "150", "link": "/block/17000000/txs" },
+        { "label": "Validated By", "value": "0x...", "link": "/address/0x...", "hasCopy": true }
+        /* ... more formatted fields */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Raw Data",
+    "name": "Get Raw Transaction",
+    "path": "/2/txs/specific",
+    "method": "GET",
+    "description": "Retrieves raw and unified/formatted data for a specific transaction hash.",
+    "required_parameters": [
+      {
+        "name": "hash",
+        "type": "string",
+        "description": "Transaction hash.",
+        "example": "/2/txs/specific?hash=0x...&blockchain=ethereum"
+      }
+    ],
+    "optional_parameters": [
+       {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID.",
+        "example": "/2/txs/specific?hash=0x...&blockchain=ethereum"
+      }
+    ],
+    "response": {
+      "raw": [ /* Raw transaction data (structure varies by chain) */
+        {
+          "chain_id": "1",
+          "hash": "0x...",
+          "number": "17000000", /* Block number */
+          "transaction_index": "5",
+          "gas_price": "20000000000", /* Wei */
+          "gas_used": "21000",
+          "from": "0x...",
+          "to": "0x...",
+          "block_hash": "0x...",
+          "status": "1", /* 1 for success, 0 for failure */
+          "timestamp": "1678886400",
+          "vm_status": "Executed",
+          "payload_type": "call",
+          "payload_function": "transfer(address,uint256)"
+          /* ... other chain-specific fields */
+        }
+      ],
+      "unified": [ /* Formatted transaction data for display */
+        { "label": "Transaction Hash", "value": "0x...", "hasCopy": true },
+        { "label": "Status", "value": "Success", "icon": true, "color": "green" },
+        { "label": "Block", "value": "17000000", "link": "/block/17000000" },
+        { "label": "Timestamp", "value": "Mar 15, 2023 ..." },
+        { "label": "From", "value": "0x...", "link": "/address/0x...", "hasCopy": true },
+        { "label": "To", "value": "0x...", "link": "/address/0x...", "hasCopy": true },
+        { "label": "Value", "value": "1 ETH", "logo": "..." },
+        { "label": "Transaction Fee", "value": "0.00042 ETH ($0.74)", "logo": "..." }
+        /* ... more formatted fields */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Raw Data",
+    "name": "Get Raw Block Transactions",
+    "path": "/2/blocks/transactions",
+    "method": "GET",
+    "description": "Retrieves raw and unified/formatted transaction data for all transactions within a specific block. Supports pagination.",
+    "required_parameters": [],
+     "optional_parameters": [
+      {
+        "name": "blockId",
+        "type": "string",
+        "description": "Block number or block hash.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum"
+      },
+      {
+        "name": "limit",
+        "type": "integer",
+        "description": "Number of transactions per page.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum&limit=50"
+      },
+      {
+        "name": "page",
+        "type": "integer",
+        "description": "Page number.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum&limit=100&page=2"
+      },
+       {
+        "name": "order",
+        "type": "string",
+        "description": "Sort order ('ASC' or 'DESC') by transaction index. Default: 'DESC'.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum&order=ASC"
+      },
+       {
+        "name": "pagination",
+        "type": "boolean",
+        "description": "Include pagination details.",
+        "example": "/2/blocks/transactions?blockId=17000000&blockchain=ethereum&pagination=true"
+      }
+    ],
+    "response": {
+      "raw": [ /* Array of raw transaction data, structure similar to /2/txs/specific */ ],
+      "unified": [ /* Array of unified transaction data, structure similar to /2/txs/specific */ ],
+      "pagination": { /* Included if pagination=true */ }
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get All Cryptocurrencies",
+    "path": "/1/all",
+    "method": "GET",
+    "description": "Retrieves a list of all cryptocurrencies curated by Mobula, with optional field selection. Data is cached for 1 hour; use market endpoints for real-time data.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "fields",
+        "type": "string[]",
+        "description": "Comma-separated list of fields to include in the response (e.g., 'id,name,symbol,price,market_cap'). See endpoint docs for all available fields.",
+        "example": "/1/all?fields=id,name,symbol,price"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "id": 1,
+          "name": "Bitcoin",
+          "symbol": "BTC",
+          "logo": "https://...",
+          "price": 65000.00,
+          "price_change_1h": 0.1,
+          "price_change_24h": -1.5,
+          "price_change_7d": 2.3,
+          "price_change_1m": 5.0,
+          "price_change_1y": 120.5,
+          "market_cap": 1280000000000,
+          "liquidity": 5000000000,
+          "volume": 30000000000,
+          "blockchains": [],
+          "contracts": [],
+          "decimals": [],
+          "website": "https://bitcoin.org/",
+          "twitter": "https://twitter.com/Bitcoin",
+          "chat": null
+        }
+        /* ... more cryptocurrencies */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Search by name",
+    "path": "/1/search",
+    "method": "GET",
+    "description": "Searches for assets, tokens, or pairs based on a name, symbol, or contract address input. Supports filtering by type, blockchain, factory, and pool type.",
+    "required_parameters": [
+      {
+        "name": "input",
+        "type": "string",
+        "description": "The search query (name, symbol, address).",
+        "example": "/1/search?input=chainlink"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "filters",
+        "type": "string",
+        "description": "JSON string for filtering (e.g., '{\"blockchains\":\"Ethereum,Solana\",\"types\":\"tokens\"}'). Available filters: types, blockchains, factory, poolTypes.",
+        "example": "/1/search?input=weth&filters={\"blockchains\":\"arbitrum\"}"
+      }
+      /* 'type' parameter mentioned in docs seems redundant with 'filters.types' */
+    ],
+    "response": {
+      "data": [
+        /* Response structure varies based on result type (asset, token, pair) */
+        /* Example for a token result: */
+        {
+          "logo": "https://...",
+          "name": "ChainLink Token",
+          "symbol": "LINK",
+          "decimals": [18],
+          "volume_24h": 150000000,
+          "blockchains": ["ethereum"],
+          "contracts": ["0x514910771af9ca656af840dff83e8264ecf986ca"],
+          "price": 14.50,
+          "total_supply": "1000000000",
+          "pairs": [ /* Associated pairs */ ],
+          "type": "token"
+        }
+        /* ... other results */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get Metadata",
+    "path": "/1/metadata",
+    "method": "GET",
+    "description": "Retrieves detailed metadata for a specific asset, including social links, description, tokenomics (supply, distribution, investors, vesting), audits, KYC info, and CEX listings.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name or contract address.",
+        "example": "/1/metadata?asset=avalanche"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID. Required if 'asset' is a contract address.",
+        "example": "/1/metadata?asset=0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7&blockchain=avalanche"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol.",
+        "example": "/1/metadata?symbol=AVAX"
+      },
+      {
+        "name": "id",
+        "type": "integer",
+        "description": "Asset ID.",
+        "example": "/1/metadata?id=5805" /* Avalanche ID */
+      }
+    ],
+    "response": {
+      "data": {
+        "id": 5805,
+        "name": "Avalanche",
+        "symbol": "AVAX",
+        "contracts": ["0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"],
+        "blockchains": ["Avalanche"],
+        "decimals": [18],
+        "twitter": "https://twitter.com/avax",
+        "website": "https://www.avax.network/",
+        "logo": "https://...",
+        "price": 35.00,
+        "market_cap": 13000000000,
+        "liquidity": 500000000,
+        "volume": 300000000,
+        "description": "Avalanche is a layer one blockchain...",
+        "kyc": null,
+        "audit": null,
+        "total_supply_contracts": [],
+        "circulating_supply_addresses": [],
+        "total_supply": 720000000,
+        "circulating_supply": 393758280,
+        "discord": "https://discord.com/invite/RwXY7P6",
+        "max_supply": 720000000,
+        "chat": "https://t.me/avalancheavax",
+        "tags": ["Layer 1", "Smart Contracts"],
+        "investors": [ /* List of investors */ ],
+        "distribution": [ /* Token distribution details */ ],
+        "release_schedule": [ /* Vesting schedule */ ],
+        "cexs": [ /* Centralized exchanges listing the asset */ ],
+        "listed_at": "2020-09-22T..."
+      }
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get Metadata (batch)",
+    "path": "/1/multi-metadata",
+    "method": "GET",
+    "description": "Retrieves detailed metadata for multiple assets simultaneously.",
+    "required_parameters": [],
+    "optional_parameters": [
+       {
+        "name": "assets",
+        "type": "string[]",
+        "description": "Comma-separated list of asset names or contract addresses.",
+        "example": "/1/multi-metadata?assets=avalanche,solana"
+      },
+      {
+        "name": "blockchains",
+        "type": "string[]",
+        "description": "Comma-separated list of blockchain names or IDs, corresponding to contract addresses in 'assets'.",
+        "example": "/1/multi-metadata?assets=0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7,So11111111111111111111111111111111111111112&blockchains=avalanche,solana"
+      },
+      {
+        "name": "symbols",
+        "type": "string[]",
+        "description": "Comma-separated list of asset symbols.",
+        "example": "/1/multi-metadata?symbols=AVAX,SOL"
+      },
+      {
+        "name": "ids",
+        "type": "integer[]",
+        "description": "Comma-separated list of asset IDs.",
+        "example": "/1/multi-metadata?ids=5805,5426"
+      }
+    ],
+    "response": {
+      "data": [
+        {
+          "data": { /* Metadata structure similar to /1/metadata for asset 1 */ }
+        },
+        {
+           "data": { /* Metadata structure similar to /1/metadata for asset 2 */ }
+        }
+        /* ... more assets */
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get Meta Trendings",
+    "path": "/1/metadata/trendings",
+    "method": "GET",
+    "description": "Retrieves assets currently trending across Mobula, CoinMarketCap, and CoinGecko, ranked by a weighted trending score. Supports filtering by platform and blockchain.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "platform",
+        "type": "string",
+        "description": "Filter by platform ('CoinMarketCap', 'CoinGecko', 'LamboTrendings').",
+        "example": "/1/metadata/trendings?platform=CoinMarketCap"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Filter trending assets by a specific blockchain.",
+        "example": "/1/metadata/trendings?blockchain=ethereum"
+      }
+    ],
+    "response": [
+      {
+        "name": "Hedera",
+        "symbol": "HBAR",
+        "contracts": [ { "address": "...", "blockchain": "Hedera", "decimals": 8 } ],
+        "price_change_24h": -6.78,
+        "price": 0.075,
+        "logo": "https://...",
+        "trending_score": 25.4,
+        "pair": "0x...", /* Example pair address */
+        "platforms": [ /* Platforms where it's trending */
+          { "name": "CoinMarketCap", "rank": 1, "weigth": 1.0 },
+          { "name": "CoinGecko", "rank": 3, "weigth": 0.8 }
+        ]
+      }
+      /* ... more trending assets */
+    ]
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get All Categories",
+    "path": "/1/metadata/categories",
+    "method": "GET",
+    "description": "Retrieves a list of all cryptocurrency categories tracked by Mobula, along with their aggregated market cap and recent performance.",
+    "required_parameters": [],
+    "optional_parameters": [],
+    "response": [
+      {
+        "name": "Layer 1",
+        "market_cap": 2000000000000,
+        "market_cap_change_24h": -1.2,
+        "market_cap_change_7d": 3.5
+      },
+      {
+        "name": "DeFi",
+        "market_cap": 150000000000,
+        "market_cap_change_24h": -0.8,
+        "market_cap_change_7d": 2.1
+      }
+      /* ... more categories */
+    ]
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Get All Blockchains",
+    "path": "/1/blockchains",
+    "method": "GET",
+    "description": "Retrieves detailed information about all blockchains supported by Mobula, including RPCs, explorers, native/stable tokens, chain IDs, supported protocols, and logos.",
+    "required_parameters": [],
+    "optional_parameters": [],
+    "response": {
+      "data": [
+        {
+          "name": "Ethereum",
+          "shortName": "eth",
+          "rpcs": ["https://mainnet.infura.io/v3/..."],
+          "explorer": "https://etherscan.io/",
+          "color": "#627EEA",
+          "privateRpcs": [],
+          "chainId": "1",
+          "evmChainId": 1,
+          "cosmosChainId": null,
+          "testnet": false,
+          "multicall_contract": "0x...",
+          "uniswapV3Factory": ["0x1F98431c8aD98523631AE4a59f267346ea31F984"],
+          "eth": { /* Native token details */ },
+          "stable": { /* Primary stablecoin details (e.g., USDC) */ },
+          "routers": [ /* Known DEX routers */ ],
+          "tokens": [ /* Commonly used tokens on this chain */ ],
+          "supportedProtocols": ["uniswap-v2", "uniswap-v3", ...],
+          "logo": "https://...",
+          "coingeckoChain": "ethereum",
+          "dexscreenerChain": "ethereum",
+          "isLayer2": false,
+          "coverage": ["market", "wallet", "raw"]
+        }
+        /* ... more blockchains */
+      ]
+    }
+  },
+   {
+    "endpoint_group": "Metacore",
+    "name": "Query Blockchain Tables",
+    "path": "/1/blockchain/query",
+    "method": "POST",
+    "description": "Executes SQL queries against Mobula's indexed blockchain data tables (PairTick, Pair, Trade, EVMEvent_<topic_hash>). Requires SQL payload in the request body.",
+    "required_parameters": [
+       {
+        "name": "sql",
+        "type": "string",
+        "in": "body",
+        "description": "The SQL query string to execute.",
+        "example": "{\"sql\": \"SELECT * FROM \\\"PairTick\\\" WHERE pair_id = '0x...' LIMIT 10\"}"
+      }
+    ],
+    "optional_parameters": [],
+    "response": {
+      /* Response structure depends entirely on the SQL query executed */
+      /* Example for SELECT * FROM PairTick: */
+      "results": [
+        {
+          "pair_id": "0x...",
+          "date": "2024-05-06T10:00:00Z",
+          "price": 3500.0,
+          "price_usd": 3500.0,
+          "volume": 10000.0,
+          "is_mev": false
+        }
+      ]
+    }
+  },
+  {
+    "endpoint_group": "Metacore",
+    "name": "Decode Blockchain Events",
+    "path": "/1/blockchain/decode",
+    "method": "POST",
+    "description": "Decodes blockchain event logs based on provided ABIs and event data. Useful for interpreting raw event data.",
+     "required_parameters": [
+        {
+          "name": "abi",
+          "type": "object[]",
+          "in": "body",
+          "description": "The contract ABI containing the event definitions.",
+          "example": "[{\"anonymous\":false,\"inputs\":[...],\"name\":\"Transfer\",\"type\":\"event\"}]"
+        },
+        {
+          "name": "logs",
+          "type": "object[]",
+          "in": "body",
+          "description": "Array of raw event logs to decode (containing topics and data fields).",
+          "example": "[{\"topics\":[\"0xddf25...\", \"0x...\", \"0x...\"], \"data\":\"0x...\"}]"
+        }
+    ],
+    "optional_parameters": [],
+    "response": [
+      {
+        "eventName": "Transfer",
+        "decodedParams": {
+          "from": "0x...",
+          "to": "0x...",
+          "value": "1000000000000000000"
+        },
+        "rawLog": { /* Original raw log */ }
+      }
+      /* ... more decoded logs */
+    ]
+  },
+  {
+    "endpoint_group": "Misc",
+    "name": "Get Sparkline",
+    "path": "/1/market/sparkline",
+    "method": "GET",
+    "description": "Generates a URL for a 24-hour price sparkline image (SVG or PNG) for a given asset.",
+    "required_parameters": [],
+    "optional_parameters": [
+      {
+        "name": "asset",
+        "type": "string",
+        "description": "Asset name, symbol, ID, or contract address.",
+        "example": "/1/market/sparkline?asset=bitcoin"
+      },
+      {
+        "name": "blockchain",
+        "type": "string",
+        "description": "Blockchain name or ID (required if 'asset' is address).",
+        "example": "/1/market/sparkline?asset=0x...&blockchain=ethereum"
+      },
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "Asset symbol.",
+        "example": "/1/market/sparkline?symbol=BTC"
+      },
+      {
+        "name": "id",
+        "type": "integer",
+        "description": "Asset ID.",
+        "example": "/1/market/sparkline?id=1"
+      },
+      {
+        "name": "timeFrame",
+        "type": "string",
+        "description": "Time frame for the sparkline (e.g., '24h', '7d'). Default: '24h'.",
+        "example": "/1/market/sparkline?asset=bitcoin&timeFrame=7d"
+      },
+      {
+        "name": "png",
+        "type": "boolean",
+        "description": "Set to true to get a PNG image URL instead of SVG. Default: false.",
+        "example": "/1/market/sparkline?asset=bitcoin&png=true"
+      }
+    ],
+    "response": {
+      "url": "https://api.mobula.io/sparkline/...?asset=bitcoin&..." /* URL to the sparkline image */
+    }
+  },
+  {
+    "endpoint_group": "Misc",
+    "name": "Get CeFi Funding Rate",
+    "path": "/1/market/cefi/funding-rate",
+    "method": "GET",
+    "description": "Retrieves the current perpetual futures funding rates for a given symbol from supported CeFi exchanges (Binance, Deribit). Also available via WebSocket.",
+    "required_parameters": [
+      {
+        "name": "symbol",
+        "type": "string",
+        "description": "The base asset symbol (e.g., 'BTC').",
+        "example": "/1/market/cefi/funding-rate?symbol=BTC"
+      }
+    ],
+    "optional_parameters": [
+      {
+        "name": "quote",
+        "type": "string",
+        "description": "The quote asset symbol (e.g., 'USDT'). Default depends on the exchange.",
+        "example": "/1/market/cefi/funding-rate?symbol=BTC&quote=USDT"
+      }
+    ],
+    "response": {
+      "binanceFundingRate": {
+        "symbol": "BTCUSDT",
+        "fundingTime": 1678896000000, /* Timestamp ms */
+        "fundingRate": 0.0001, /* Rate */
+        "marketPrice": "65000.50",
+        "epochDurationMs": 28800000 /* 8 hours */
+      },
+      "deribitFundingRate": {
+        "symbol": "BTC-PERPETUAL",
+        "fundingTime": 1678896000000,
+        "fundingRate": 0.00012,
+        "marketPrice": 65001.00,
+        "epochDurationMs": 28800000
+      },
+      "queryDetails": {
+        "base": "BTC",
+        "quote": "USDT" /* Or the default/derived quote */
+      }
+    }
+  }
 ]
