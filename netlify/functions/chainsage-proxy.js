@@ -108,8 +108,10 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         4.  Determine if a query is possible.
         5.  Generate a response, following these rules:
             * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
-            * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead.
-            * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a nlockchain wizard, get the user interested in web3, respond to what user asked)
+            * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead
+            * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead. 
+            * If a query is not possible but you can answer the question based on what you know, return a JSON object with the answer and mention "not real time data". 
+            * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a blockchain wizard, get the user interested in web3, respond to what user asked) 
         
         Example 1:
         User Question: "What is the price of Bitcoin?"
@@ -153,6 +155,16 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         {
             "can_query": false,
             "message": "Welcome mortal, are you interested in learning about the blockchain. ask me about the wallets you wish to spy on"
+        }
+
+
+        Example 5:
+        User Question: "what were the biggest whale moves of the day"
+        
+        Your Response:
+        {
+            "can_query": false,
+            "message":" Mortal, you may ask me about the highest volume trades of the day, and then ask me about the wallet addresses of those. ask better."
         }
         
         Analyze the following user question and provide your response as a JSON object:
