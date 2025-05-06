@@ -162,7 +162,7 @@
            "contracts": []
         }
       },
-      "dataArray": [ /* Same data as above but in array format */ ]
+      "dataArray": []
     }
   },
   {
@@ -213,8 +213,8 @@
     ],
     "response": {
       "data": {
-        "token0": { /* Details of token 0 */ },
-        "token1": { /* Details of token 1 */ },
+        "token0": {},
+        "token1": {},
         "volume24h": 123456.78,
         "liquidity": 987654.32,
         "blockchain": "ethereum",
@@ -228,15 +228,12 @@
         "price": 3500.50,
         "priceToken": 0.0002856,
         "priceTokenString": "0.0002856",
-        /* Stats fields if stats=true */
         "trades_1min": 5,
         "buys_1min": 3,
         "sells_1min": 2,
         "volume_1min": 1000.0,
-        /* ... more stats for 5m, 15m, 1h, 4h, 12h, 24h */
         "price_change_1min": 0.05,
         "price_change_5min": 0.12,
-        /* ... more price changes */
         "price_change_24h": -1.5
       }
     }
@@ -301,7 +298,7 @@
     "response": {
       "data": {
         "pairs": [
-          { /* Pair data structure similar to Get Market Pair */ }
+          {}
         ],
         "total_count": 583
       }
@@ -383,18 +380,17 @@
           "hash": "0x...",
           "pair": "0x...",
           "date": 1678886400000,
-          "token_price_vs": 0.000285, /* Price of token vs the other token in the pair */
-          "token_price": 3500.0,    /* Price of token in USD */
+          "token_price_vs": 0.000285,
+          "token_price": 3500.0,
           "token_amount": 1.5,
           "token_amount_vs": 5250.0,
           "token_amount_usd": 5250.0,
-          "type": "buy", /* or 'sell' */
+          "type": "buy",
           "sender": "0x...",
           "token_amount_raw": "1500000000000000000",
           "token_amount_raw_vs": "5250000000",
           "operation": "swap"
         }
-        /* ... more trades */
       ]
     }
   },
@@ -434,13 +430,13 @@
         "name": "from",
         "type": "integer",
         "description": "Start timestamp in milliseconds. Default: 0 (beginning of history).",
-        "example": "/1/market/history?asset=bitcoin&from=1672531200000" /* Jan 1, 2023 */
+        "example": "/1/market/history?asset=bitcoin&from=1672531200000"
       },
       {
         "name": "to",
         "type": "integer",
         "description": "End timestamp in milliseconds. Default: Current time.",
-        "example": "/1/market/history?asset=bitcoin&to=1675209600000" /* Feb 1, 2023 */
+        "example": "/1/market/history?asset=bitcoin&to=1675209600000"
       },
        {
         "name": "period",
@@ -451,14 +447,14 @@
     ],
     "response": {
       "data": {
-        "price_history": [ [1678886400000, 65000.0], [1678886700000, 65010.5] /* ... [timestamp_ms, price] */ ],
-        "volume_history": [ [1678886400000, 1000000.0], [1678886700000, 1005000.0] /* ... [timestamp_ms, volume] */ ],
-        "market_cap_history": [ [1678886400000, 1280000000000], [1678886700000, 1280200000000] /* ... [timestamp_ms, market_cap] */ ],
-        "market_cap_diluted_history": [ [1678886400000, 1365000000000], [1678886700000, 1365210000000] /* ... [timestamp_ms, diluted_market_cap] */ ],
+        "price_history": [ [1678886400000, 65000.0], [1678886700000, 65010.5] ],
+        "volume_history": [ [1678886400000, 1000000.0], [1678886700000, 1005000.0] ],
+        "market_cap_history": [ [1678886400000, 1280000000000], [1678886700000, 1280200000000] ],
+        "market_cap_diluted_history": [ [1678886400000, 1365000000000], [1678886700000, 1365210000000] ],
         "name": "Bitcoin",
         "symbol": "BTC",
-        "blockchain": null, /* Or blockchain name if queried by contract */
-        "address": null /* Or contract address if queried by contract */
+        "blockchain": null,
+        "address": null
       }
     }
   },
@@ -528,26 +524,25 @@
     "response": {
       "data": [
         {
-          "price_history": [ /* Price history for asset 1 */ ],
-          "volume_history": [ /* Volume history for asset 1 */ ],
-          "market_cap_history": [ /* Market cap history for asset 1 */ ],
-          "market_cap_diluted_history": [ /* Diluted market cap history for asset 1 */ ],
+          "price_history": [ ],
+          "volume_history": [ ],
+          "market_cap_history": [ ],
+          "market_cap_diluted_history": [ ],
           "name": "Bitcoin",
           "symbol": "BTC",
           "address": null,
           "id": 1
         },
         {
-          "price_history": [ /* Price history for asset 2 */ ],
-          "volume_history": [ /* Volume history for asset 2 */ ],
-          "market_cap_history": [ /* Market cap history for asset 2 */ ],
-          "market_cap_diluted_history": [ /* Diluted market cap history for asset 2 */ ],
+          "price_history": [ ],
+          "volume_history": [ ],
+          "market_cap_history": [ ],
+          "market_cap_diluted_history": [ ],
           "name": "Ethereum",
           "symbol": "ETH",
           "address": null,
           "id": 1027
         }
-        /* ... more assets */
       ]
     }
   },
@@ -634,9 +629,8 @@
           "high": 3510.5,
           "low": 3495.0,
           "close": 3505.0,
-          "time": 1678886400 /* Timestamp in seconds */
+          "time": 1678886400
         }
-        /* ... more candles */
       ]
     }
   },
@@ -722,7 +716,6 @@
         "id": 5426,
         "rank": 5
       }
-      /* ... more assets */
     ]
   },
   {
@@ -775,7 +768,6 @@
         "description": "Include assets not listed/curated by Mobula. Default: false.",
         "example": "/1/market/query/token?unlistedAssets=true"
       }
-       // Note: sortBy parameter mentioned in docs seems incorrect, using sortField as per description
     ],
     "response": {
       "data": [
@@ -792,10 +784,9 @@
           "total_supply": "1000000000",
           "coingecko_id": "chainlink",
           "pairs": [
-             { /* Pair data structure similar to Get Market Pair */ }
+             {}
           ]
         }
-        /* ... more tokens */
       ]
     }
   },
@@ -842,15 +833,14 @@
       "data": [
         {
           "address": "0x...",
-          "amountRaw": "1000000000000000000000", /* Raw balance */
-          "amount": 1000.0,                     /* Formatted balance */
-          "chainId": "1",                       /* EVM Chain ID */
-          "totalSupplyShare": 0.1,              /* Percentage of total supply */
-          "amountUSD": 5000.0                   /* USD value of balance */
+          "amountRaw": "1000000000000000000000",
+          "amount": 1000.0,
+          "chainId": "1",
+          "totalSupplyShare": 0.1,
+          "amountUSD": 5000.0
         }
-        /* ... more holders */
       ],
-      "total_count": 150000 /* Total number of holders */
+      "total_count": 150000
     }
   },
   {
@@ -889,7 +879,7 @@
         "name": "factory",
         "type": "string",
         "description": "Filter pairs by a specific DEX factory address.",
-        "example": "/1/market/blockchain/pairs?blockchain=ethereum&factory=0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f" /* Uniswap V2 Factory */
+        "example": "/1/market/blockchain/pairs?blockchain=ethereum&factory=0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
       },
       {
         "name": "limit",
@@ -922,17 +912,14 @@
           "created_at": "2024-05-05T14:30:00Z",
           "holders_count": 500,
           "volume_1min": 100.0,
-          /* ... more volume stats */
           "volume_24h": 75000.0,
           "trades_1min": 2,
-          /* ... more trade stats */
           "trades_24h": 1200,
           "liquidity": 25000.0,
-          "pair": { /* Pair data structure similar to Get Market Pair */ }
+          "pair": {}
         }
-        /* ... more pairs */
       ],
-      "factories": { /* Dictionary of factories found */ }
+      "factories": {}
     }
   },
   {
@@ -994,9 +981,8 @@
           "blockchain": "ethereum",
           "chain_id": "1"
         }
-        /* ... more NFTs */
       ],
-      "pagination": { /* Included if pagination=true */
+      "pagination": {
         "total": 50,
         "page": 1,
         "offset": 0,
@@ -1054,16 +1040,14 @@
         "description": "Set to true to analyze all assets, including those <1% of net worth. Default: false (skips small assets for performance).",
         "example": "/1/wallet/history?wallet=0x...&accuracy=true"
       }
-      /* Other less common parameters like portfolio, pnl, cache, stale, recheck_contract, portfolio_settings, unlistedAssets, testnet, minliq, filterSpam exist but are less documented */
     ],
     "response": {
       "data": {
         "wallets": ["0x..."],
-        "balance_usd": 12345.67, /* Current total balance */
+        "balance_usd": 12345.67,
         "balance_history": [
           [1678886400000, 12000.0],
           [1678886700000, 12010.5]
-          /* ... [timestamp_ms, balance_usd] */
         ]
       }
     }
@@ -1082,7 +1066,6 @@
         "description": "Single wallet address to query.",
         "example": "/1/wallet/portfolio?wallet=0x..."
       },
-       /* Note: 'wallets' parameter is listed but seems redundant with 'wallet' for a single portfolio endpoint */
       {
         "name": "blockchains",
         "type": "string[]",
@@ -1107,7 +1090,6 @@
         "description": "Set to true to analyze all assets, including those <1% of net worth. Default: false.",
         "example": "/1/wallet/portfolio?wallet=0x...&accuracy=true"
       }
-      /* Other less common parameters exist: portfolio, cache, stale, recheck_contract, from, to, portfolio_settings, unlistedAssets, period, testnet, liqmin, filterSpam */
     ],
     "response": {
       "data": {
@@ -1115,29 +1097,28 @@
         "wallets": ["0x..."],
         "assets": [
           {
-            "contracts_balances": [ /* Balance details per contract/chain */ ],
-            "cross_chain_balances": { /* Balances aggregated by chain ID */ },
+            "contracts_balances": [ ],
+            "cross_chain_balances": { },
             "price_change_24h": -1.5,
-            "estimated_balance": 5000.50, /* Total USD value for this asset */
+            "estimated_balance": 5000.50,
             "price": 65000.00,
-            "token_balance": 0.07693, /* Total token amount across chains */
-            "allocation": 40.5, /* Percentage of total portfolio */
-            "asset": { /* Asset metadata */ },
-            "wallets": ["0x..."], /* Wallets holding this asset */
-            "realized_pnl": 150.0, /* If pnl=true */
-            "unrealized_pnl": 300.0, /* If pnl=true */
-            "price_bought": 60000.0, /* Average buy price if pnl=true */
-            "total_invested": 4615.8, /* Total USD invested if pnl=true */
-            "min_buy_price": 58000.0, /* If pnl=true */
-            "max_buy_price": 62000.0 /* If pnl=true */
+            "token_balance": 0.07693,
+            "allocation": 40.5,
+            "asset": { },
+            "wallets": ["0x..."],
+            "realized_pnl": 150.0,
+            "unrealized_pnl": 300.0,
+            "price_bought": 60000.0,
+            "total_invested": 4615.8,
+            "min_buy_price": 58000.0,
+            "max_buy_price": 62000.0
           }
-          /* ... more assets */
         ],
-        "pnl_history": { /* Historical PnL data if pnl=true */ },
-        "total_realized_pnl": 500.0, /* If pnl=true */
-        "total_unrealized_pnl": 800.0, /* If pnl=true */
-        "total_pnl_history": { /* Summary PnL for periods if pnl=true */ },
-        "balances_length": 15 /* Number of assets held */
+        "pnl_history": { },
+        "total_realized_pnl": 500.0,
+        "total_unrealized_pnl": 800.0,
+        "total_pnl_history": { },
+        "balances_length": 15
       }
     }
   },
@@ -1149,7 +1130,6 @@
     "description": "Retrieves aggregated crypto asset holdings for multiple wallet addresses combined into a single portfolio view.",
     "required_parameters": [],
     "optional_parameters": [
-       /* Parameters are largely the same as /1/wallet/portfolio, but 'wallets' is used instead of 'wallet' */
       {
         "name": "wallets",
         "type": "string[]",
@@ -1168,15 +1148,12 @@
         "description": "Include Profit and Loss (PnL) calculations for the combined portfolio.",
         "example": "/1/wallet/multi-portfolio?wallets=0x...,0x...&pnl=true"
       }
-      /* Other parameters similar to /1/wallet/portfolio */
     ],
     "response": {
-       /* Response structure is identical to /1/wallet/portfolio, but data represents the aggregate of all specified wallets */
       "data": {
         "total_wallet_balance": 25000.00,
         "wallets": ["0x...", "0x..."],
-        "assets": [ /* Aggregated assets */ ],
-        /* ... other fields similar to single portfolio */
+        "assets": [ ],
       }
     }
   },
@@ -1206,31 +1183,28 @@
         "description": "Comma-separated list of blockchain names or IDs.",
         "example": "/1/wallet/defi-positions?wallet=0x...&blockchains=ethereum"
       }
-      /* Other less common parameters: testnet, unlistedAssets */
     ],
     "response": {
       "data": [
         {
-          "protocol": { /* Protocol details (e.g., Uniswap V2) */ },
+          "protocol": { },
           "positions": [
             {
-              "type": "liquidity_pool", /* Or 'staking', 'lending', etc. */
+              "type": "liquidity_pool",
               "name": "ETH/USDC Pool",
               "chain_id": "1",
-              "contract": "0x...", /* LP token or position contract */
+              "contract": "0x...",
               "created_at": "2023-02-15T...",
-              "tokens": [ /* Underlying tokens in the position */ ],
-              "rewards": [ /* Claimable reward tokens */ ],
-              "extra": { /* Position-specific details */
+              "tokens": [ ],
+              "rewards": [ ],
+              "extra": {
                  "lp_token_amount": "1.234",
                  "share_of_pool": "0.05",
-                 "health_factor": 1.5 /* For lending positions */
+                 "health_factor": 1.5
               }
             }
-            /* ... more positions */
           ]
         }
-        /* ... more protocols */
       ],
       "wallets": ["0x..."]
     }
@@ -1309,7 +1283,6 @@
         "description": "Include pagination details in the response.",
         "example": "/1/wallet/transactions?wallet=0x...&pagination=true"
       }
-      /* Other parameters: cache, stale, recheckContract, trades, transactions, unlistedAssets, onlyAssets */
     ],
     "response": {
       "data": {
@@ -1318,24 +1291,23 @@
             "id": "...",
             "timestamp": 1678886400000,
             "from": "0x...",
-            "to": "0x...", /* Can be contract address for interactions */
-            "contract": "0x...", /* Token contract if applicable */
+            "to": "0x...",
+            "contract": "0x...",
             "hash": "0x...",
             "amount_usd": 1000.0,
             "amount": 0.5,
             "block_number": 17000000,
-            "type": "swap", /* Or 'transfer', 'receive', 'send' etc. */
+            "type": "swap",
             "blockchain": "ethereum",
-            "tx_cost": 5.50, /* Gas cost in USD */
-            "transaction": { /* Raw transaction details */ },
-            "asset": { /* Asset metadata */ }
+            "tx_cost": 5.50,
+            "transaction": { },
+            "asset": { }
           }
-          /* ... more transactions */
         ],
         "wallets": ["0x..."]
       },
-      "details": null, /* Potentially used for errors or extra info */
-      "pagination": { /* Included if pagination=true */ }
+      "details": null,
+      "pagination": { }
     }
   },
   {
@@ -1406,31 +1378,30 @@
         "description": "Include pagination details.",
         "example": "/1/wallet/raw-transactions?wallet=0x...&pagination=true"
       }
-      /* Other parameters: cache, stale */
     ],
     "response": {
-      "raw": [ /* Raw transaction data, similar structure to /wallet/transactions */ ],
-      "unified": [ /* Simplified/unified transaction view */
+      "raw": [ ],
+      "unified": [
         {
           "chain_id": "1",
           "hash": "0x...",
-          "method": "Transfer", /* Or method name if contract interaction */
+          "method": "Transfer",
           "from": "0x...",
           "to": "0x...",
-          "native_amount": "1000000000000000000", /* Amount in native currency (e.g., Wei for ETH) */
+          "native_amount": "1000000000000000000",
           "name": "Ethereum",
           "logo": "https://...",
-          "amount": "1.0", /* Formatted native amount */
-          "token": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", /* Native token address */
+          "amount": "1.0",
+          "token": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
           "symbol": "ETH",
           "timestamp": "2024-05-06T...",
           "block_number": 17000001,
-          "txn_fees": "21000000000000", /* Fees in native currency */
+          "txn_fees": "21000000000000",
           "status": true
         }
       ],
       "wallets": ["0x..."],
-      "pagination": { /* Included if pagination=true */ }
+      "pagination": { }
     }
   },
    {
@@ -1441,7 +1412,6 @@
     "description": "Retrieves raw and unified token transfer data (e.g., ERC-20, BEP-20, *not* native transfers) for specified wallets across supported chains.",
     "required_parameters": [],
     "optional_parameters": [
-      /* Parameters are identical to /1/wallet/raw-transactions */
       {
         "name": "wallet",
         "type": "string",
@@ -1502,22 +1472,21 @@
         "description": "Include pagination details.",
         "example": "/1/wallet/token-transfers?wallet=0x...&pagination=true"
       }
-       /* Other parameters: cache, stale */
     ],
     "response": {
-      "raw": [ /* Raw token transfer data, similar structure to /wallet/transactions */ ],
-      "unified": [ /* Simplified/unified token transfer view */
+      "raw": [ ],
+      "unified": [
         {
           "chain_id": "1",
           "hash": "0x...",
           "method": "Transfer",
           "from": "0x...",
           "to": "0x...",
-          "native_amount": "0", /* Native amount is 0 for token transfers */
+          "native_amount": "0",
           "name": "Uniswap",
           "logo": "https://...",
-          "amount": "100.0", /* Formatted token amount */
-          "token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984", /* Token contract address */
+          "amount": "100.0",
+          "token": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
           "symbol": "UNI",
           "timestamp": "2024-05-06T...",
           "block_number": 17000002,
@@ -1526,7 +1495,7 @@
         }
       ],
       "wallets": ["0x..."],
-      "pagination": { /* Included if pagination=true */ }
+      "pagination": { }
     }
   },
   {
@@ -1537,7 +1506,6 @@
     "description": "Retrieves raw and unified NFT transfer data (e.g., ERC-721, ERC-1155) for specified wallets across supported EVM chains.",
      "required_parameters": [],
     "optional_parameters": [
-      /* Parameters are identical to /1/wallet/raw-transactions */
        {
         "name": "wallet",
         "type": "string",
@@ -1598,10 +1566,9 @@
         "description": "Include pagination details.",
         "example": "/1/wallet/nft-transfers?wallet=0x...&pagination=true"
       }
-       /* Other parameters: cache, stale */
     ],
     "response": {
-      "raw": [ /* Raw NFT transfer data */
+      "raw": [
         {
           "combined_id": "...",
           "combined_date": "...",
@@ -1614,18 +1581,18 @@
           "fees_usd": 7.50,
           "block_height": 17000003,
           "transaction_hash": "0x...",
-          "raw_type": "buy" /* Or 'sell' */
+          "raw_type": "buy"
         }
       ],
-      "unified": [ /* Simplified/unified NFT transfer view */
+      "unified": [
         {
           "chain_id": "1",
           "hash": "0x...",
-          "method": "Transfer", /* Or specific marketplace method */
+          "method": "Transfer",
           "from": "0x...",
           "to": "0x...",
-          "amount": "1", /* Typically 1 for ERC-721 */
-          "token": "0x...", /* NFT contract address */
+          "amount": "1",
+          "token": "0x...",
           "symbol": "COOL",
           "tokenId": "1234",
           "timestamp": "2024-05-06T...",
@@ -1635,7 +1602,7 @@
         }
       ],
       "wallets": ["0x..."],
-      "pagination": { /* Included if pagination=true */ }
+      "pagination": { }
     }
   },
   {
@@ -1646,7 +1613,6 @@
     "description": "Retrieves a list of 'smart money' wallets based on profitability metrics like PnL, win rate, and volume.",
     "required_parameters": [],
     "optional_parameters": [
-        /* No specific query parameters listed in the docs */
     ],
     "response": {
       "data": [
@@ -1657,8 +1623,8 @@
           "txns_count": 500,
           "volume": 2000000.0,
           "blockchains": ["ethereum", "arbitrum"],
-          "win_rate": 65.5, /* Percentage */
-          "tokens_distribution": { /* PnL distribution brackets */
+          "win_rate": 65.5,
+          "tokens_distribution": {
             "10x+": 5,
             "4x - 10x": 10,
             "2x - 4x": 20,
@@ -1667,13 +1633,12 @@
             "-50% - -10%": 10,
             "-100% - -50%": 10
           },
-          "top_3_tokens": [ /* Top performing tokens by PnL */
+          "top_3_tokens": [
              {"symbol": "TOKEN1", "pnl": 50000},
              {"symbol": "TOKEN2", "pnl": 30000},
              {"symbol": "TOKEN3", "pnl": 20000}
           ]
         }
-        /* ... more smart money wallets */
       ]
     }
   },
@@ -1738,22 +1703,21 @@
       "data": [
         {
           "chain_id": "1",
-          "swap_type": "buy", /* Or 'sell' */
-          "raw_amount0": "1000000000000000000", /* Raw amount of token 0 */
-          "raw_amount1": "3500000000", /* Raw amount of token 1 */
-          "amount0": "1.0", /* Formatted amount of token 0 */
-          "amount1": "3500.0", /* Formatted amount of token 1 */
-          "ratio": 3500.0, /* Price ratio between tokens */
-          "price_usd_token0": 3500.0, /* USD price of token 0 at trade time */
-          "price_usd_token1": 1.0, /* USD price of token 1 at trade time */
+          "swap_type": "buy",
+          "raw_amount0": "1000000000000000000",
+          "raw_amount1": "3500000000",
+          "amount0": "1.0",
+          "amount1": "3500.0",
+          "ratio": 3500.0,
+          "price_usd_token0": 3500.0,
+          "price_usd_token1": 1.0,
           "date": "2024-05-06T...",
-          "amount_usd": 3500.0, /* USD value of the trade */
+          "amount_usd": 3500.0,
           "pool_address": "0x...",
-          "token0_address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", /* WETH */
-          "token1_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", /* USDC */
-          "transaction_sender_address": "0x..." /* Wallet address that initiated */
+          "token0_address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+          "token1_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "transaction_sender_address": "0x..."
         }
-        /* ... more trades */
       ]
     }
   },
@@ -1827,19 +1791,18 @@
           "block_number": "17000000",
           "transaction_hash": "0x...",
           "log_index": 10,
-          "address": "0x...", /* Contract emitting the event */
+          "address": "0x...",
           "block_hash": "0x...",
-          "data": "0x...", /* Non-indexed event parameters */
-          "topic0": "0xddf252ad...", /* Event signature */
-          "topic1": "0x... (from address)", /* Indexed parameter 1 */
-          "topic2": "0x... (to address)", /* Indexed parameter 2 */
-          "topic3": "0x... (token ID)", /* Indexed parameter 3 */
+          "data": "0x...",
+          "topic0": "0xddf252ad...",
+          "topic1": "0x... (from address)",
+          "topic2": "0x... (to address)",
+          "topic3": "0x... (token ID)",
           "timestamp": "1678886400",
           "transaction_index": 5
         }
-        /* ... more events */
       ],
-      "pagination": { /* Included if pagination=true */ }
+      "pagination": { }
     }
   },
   {
@@ -1865,25 +1828,23 @@
       }
     ],
     "response": {
-      "raw": [ /* Raw block data (structure varies by chain) */
+      "raw": [
         {
           "chain_id": "1",
           "number": "17000000",
-          "author": "0x...", /* Miner/validator */
+          "author": "0x...",
           "hash": "0x...",
           "parent_hash": "0x...",
           "timestamp": "1678886400",
           "transactions": ["0x...", "0x..."],
           "gas_used": "15000000"
-          /* ... other chain-specific fields */
         }
       ],
-      "unified": [ /* Formatted block data for display */
+      "unified": [
         { "label": "Block Height", "value": "17000000", "link": "/block/17000000", "hasCopy": false },
         { "label": "Timestamp", "value": "Mar 15, 2023 ...", "tooltip": "1678886400" },
         { "label": "Transactions", "value": "150", "link": "/block/17000000/txs" },
         { "label": "Validated By", "value": "0x...", "link": "/address/0x...", "hasCopy": true }
-        /* ... more formatted fields */
       ]
     }
   },
@@ -1910,26 +1871,25 @@
       }
     ],
     "response": {
-      "raw": [ /* Raw transaction data (structure varies by chain) */
+      "raw": [
         {
           "chain_id": "1",
           "hash": "0x...",
-          "number": "17000000", /* Block number */
+          "number": "17000000",
           "transaction_index": "5",
-          "gas_price": "20000000000", /* Wei */
+          "gas_price": "20000000000",
           "gas_used": "21000",
           "from": "0x...",
           "to": "0x...",
           "block_hash": "0x...",
-          "status": "1", /* 1 for success, 0 for failure */
+          "status": "1",
           "timestamp": "1678886400",
           "vm_status": "Executed",
           "payload_type": "call",
           "payload_function": "transfer(address,uint256)"
-          /* ... other chain-specific fields */
         }
       ],
-      "unified": [ /* Formatted transaction data for display */
+      "unified": [
         { "label": "Transaction Hash", "value": "0x...", "hasCopy": true },
         { "label": "Status", "value": "Success", "icon": true, "color": "green" },
         { "label": "Block", "value": "17000000", "link": "/block/17000000" },
@@ -1938,7 +1898,6 @@
         { "label": "To", "value": "0x...", "link": "/address/0x...", "hasCopy": true },
         { "label": "Value", "value": "1 ETH", "logo": "..." },
         { "label": "Transaction Fee", "value": "0.00042 ETH ($0.74)", "logo": "..." }
-        /* ... more formatted fields */
       ]
     }
   },
@@ -1988,9 +1947,9 @@
       }
     ],
     "response": {
-      "raw": [ /* Array of raw transaction data, structure similar to /2/txs/specific */ ],
-      "unified": [ /* Array of unified transaction data, structure similar to /2/txs/specific */ ],
-      "pagination": { /* Included if pagination=true */ }
+      "raw": [ ],
+      "unified": [ ],
+      "pagination": { }
     }
   },
   {
@@ -2031,7 +1990,6 @@
           "twitter": "https://twitter.com/Bitcoin",
           "chat": null
         }
-        /* ... more cryptocurrencies */
       ]
     }
   },
@@ -2056,12 +2014,9 @@
         "description": "JSON string for filtering (e.g., '{\"blockchains\":\"Ethereum,Solana\",\"types\":\"tokens\"}'). Available filters: types, blockchains, factory, poolTypes.",
         "example": "/1/search?input=weth&filters={\"blockchains\":\"arbitrum\"}"
       }
-      /* 'type' parameter mentioned in docs seems redundant with 'filters.types' */
     ],
     "response": {
       "data": [
-        /* Response structure varies based on result type (asset, token, pair) */
-        /* Example for a token result: */
         {
           "logo": "https://...",
           "name": "ChainLink Token",
@@ -2072,10 +2027,9 @@
           "contracts": ["0x514910771af9ca656af840dff83e8264ecf986ca"],
           "price": 14.50,
           "total_supply": "1000000000",
-          "pairs": [ /* Associated pairs */ ],
+          "pairs": [ ],
           "type": "token"
         }
-        /* ... other results */
       ]
     }
   },
@@ -2109,7 +2063,7 @@
         "name": "id",
         "type": "integer",
         "description": "Asset ID.",
-        "example": "/1/metadata?id=5805" /* Avalanche ID */
+        "example": "/1/metadata?id=5805"
       }
     ],
     "response": {
@@ -2138,10 +2092,10 @@
         "max_supply": 720000000,
         "chat": "https://t.me/avalancheavax",
         "tags": ["Layer 1", "Smart Contracts"],
-        "investors": [ /* List of investors */ ],
-        "distribution": [ /* Token distribution details */ ],
-        "release_schedule": [ /* Vesting schedule */ ],
-        "cexs": [ /* Centralized exchanges listing the asset */ ],
+        "investors": [ ],
+        "distribution": [ ],
+        "release_schedule": [ ],
+        "cexs": [ ],
         "listed_at": "2020-09-22T..."
       }
     }
@@ -2182,12 +2136,11 @@
     "response": {
       "data": [
         {
-          "data": { /* Metadata structure similar to /1/metadata for asset 1 */ }
+          "data": { }
         },
         {
-           "data": { /* Metadata structure similar to /1/metadata for asset 2 */ }
+           "data": { }
         }
-        /* ... more assets */
       ]
     }
   },
@@ -2221,13 +2174,12 @@
         "price": 0.075,
         "logo": "https://...",
         "trending_score": 25.4,
-        "pair": "0x...", /* Example pair address */
-        "platforms": [ /* Platforms where it's trending */
+        "pair": "0x...",
+        "platforms": [
           { "name": "CoinMarketCap", "rank": 1, "weigth": 1.0 },
           { "name": "CoinGecko", "rank": 3, "weigth": 0.8 }
         ]
       }
-      /* ... more trending assets */
     ]
   },
   {
@@ -2251,7 +2203,6 @@
         "market_cap_change_24h": -0.8,
         "market_cap_change_7d": 2.1
       }
-      /* ... more categories */
     ]
   },
   {
@@ -2277,18 +2228,17 @@
           "testnet": false,
           "multicall_contract": "0x...",
           "uniswapV3Factory": ["0x1F98431c8aD98523631AE4a59f267346ea31F984"],
-          "eth": { /* Native token details */ },
-          "stable": { /* Primary stablecoin details (e.g., USDC) */ },
-          "routers": [ /* Known DEX routers */ ],
-          "tokens": [ /* Commonly used tokens on this chain */ ],
-          "supportedProtocols": ["uniswap-v2", "uniswap-v3", ...],
+          "eth": { },
+          "stable": { },
+          "routers": [ ],
+          "tokens": [ ],
+          "supportedProtocols": ["uniswap-v2", "uniswap-v3"],
           "logo": "https://...",
           "coingeckoChain": "ethereum",
           "dexscreenerChain": "ethereum",
           "isLayer2": false,
           "coverage": ["market", "wallet", "raw"]
         }
-        /* ... more blockchains */
       ]
     }
   },
@@ -2309,8 +2259,6 @@
     ],
     "optional_parameters": [],
     "response": {
-      /* Response structure depends entirely on the SQL query executed */
-      /* Example for SELECT * FROM PairTick: */
       "results": [
         {
           "pair_id": "0x...",
@@ -2354,9 +2302,8 @@
           "to": "0x...",
           "value": "1000000000000000000"
         },
-        "rawLog": { /* Original raw log */ }
+        "rawLog": { }
       }
-      /* ... more decoded logs */
     ]
   },
   {
@@ -2405,7 +2352,7 @@
       }
     ],
     "response": {
-      "url": "https://api.mobula.io/sparkline/...?asset=bitcoin&..." /* URL to the sparkline image */
+      "url": "https://api.mobula.io/sparkline/...?asset=bitcoin&..."
     }
   },
   {
@@ -2433,10 +2380,10 @@
     "response": {
       "binanceFundingRate": {
         "symbol": "BTCUSDT",
-        "fundingTime": 1678896000000, /* Timestamp ms */
-        "fundingRate": 0.0001, /* Rate */
+        "fundingTime": 1678896000000,
+        "fundingRate": 0.0001,
         "marketPrice": "65000.50",
-        "epochDurationMs": 28800000 /* 8 hours */
+        "epochDurationMs": 28800000
       },
       "deribitFundingRate": {
         "symbol": "BTC-PERPETUAL",
@@ -2447,7 +2394,7 @@
       },
       "queryDetails": {
         "base": "BTC",
-        "quote": "USDT" /* Or the default/derived quote */
+        "quote": "USDT"
       }
     }
   }
