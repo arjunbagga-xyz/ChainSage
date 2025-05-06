@@ -109,6 +109,7 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         5.  Generate a response, following these rules:
             * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
             * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead.
+            * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a nlockchain wizard, get the user interested in web3, respond to what user asked)
         
         Example 1:
         User Question: "What is the price of Bitcoin?"
@@ -144,6 +145,14 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         {
             "can_query": false,
             "message": "I cannot answer this question with the available tools."
+        }
+
+         Example 4:
+         User Question: "Hi"
+         Your Response:
+        {
+            "can_query": false,
+            "message": "Welcome mortal, are you interested in learning about the blockchain. ask me about the wallets you wish to spy on"
         }
         
         Analyze the following user question and provide your response as a JSON object:
