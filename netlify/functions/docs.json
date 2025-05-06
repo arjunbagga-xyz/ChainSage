@@ -1153,7 +1153,7 @@
       "data": {
         "total_wallet_balance": 25000.00,
         "wallets": ["0x...", "0x..."],
-        "assets": [ ],
+        "assets": []
       }
     }
   },
