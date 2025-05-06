@@ -5,117 +5,203 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ChainSage</title>
   <style>
-    body {
+    /* Reset and basic styles for html */
+    html {
+      height: 100%; /* Ensure html takes full height */
       margin: 0;
       padding: 0;
+      /* Apply the background gradient to the html element for better cross-browser consistency */
+      background: radial-gradient(circle at center, #000000 0%, #000033 100%);
+      /* Keep the background fixed, which can help on mobile */
+      background-attachment: fixed;
+      /* Ensure content doesn't overflow the html element itself */
+      overflow: hidden;
+    }
+
+    /* Styles for the body */
+    body {
+      margin: 0; /* Remove default body margin */
+      padding: 0; /* Remove default body padding */
       font-family: 'Courier New', Courier, monospace;
-      height: 100vh;
+      /* Use min-height with vh for better mobile compatibility */
+      min-height: 100vh;
+      /* Use flexbox to position content towards the bottom */
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
+      /* Needed for absolutely positioned children like wizard, stars, etc. */
       position: relative;
+      /* Prevent body itself from scrolling (content scrolling handled elsewhere if needed) */
       overflow: hidden;
-      color: white;
-      background: radial-gradient(circle at center, #000000 0%, #000033 100%);
+      color: white; /* Default text color */
+      /* Background is now handled by the html element */
     }
 
+    /* Star styles */
     .star {
       position: absolute;
       background: white;
       border-radius: 50%;
       opacity: 0.7;
-      z-index: -1;
+      /* z-index: -1 works relative to the body's stacking context, placing stars behind other body content */
+      /* Since the main background is on html, this keeps stars above that but behind wizard/chat */
+      z-index: 0; /* Let's try z-index 0 relative to body */
     }
 
+    /* Star twinkle animation */
     @keyframes twinkle {
       0% { opacity: 0.7; }
       50% { opacity: 0.2; }
       100% { opacity: 0.7; }
     }
 
+    /* Wizard styles */
     .wizard {
-  position: absolute;
-  bottom: 20px;
-  left: 80%;
-  transform: translateX(-50%);
-  width: 240px;
-  height: 240px;
-  background: url('assets/wizard.png') no-repeat center center;
-  background-size: contain;
-  z-index: 2;
-  /* Use drop-shadow for glow that follows transparency */
-  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8)) /* Cyan glow */
-          drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); /* White inner glow */
-  animation: pulseGlow 2s ease-in-out infinite; /* Optional pulsing animation */
-}
-
-/* Optional keyframes for a pulsing glow */
-@keyframes pulseGlow {
-  0% {
-    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
-            drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-  50% {
-    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1))
-            drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
-  }
-  100% {
-    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
-            drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-  }
-}
-
-    .chat-container {
       position: absolute;
-      bottom: 160px;
+      bottom: 20px;
+      /* Centered horizontally */
       left: 50%;
       transform: translateX(-50%);
-      max-width: 60%;
-      background: #ffffff20;
-      padding: 20px 15px;
+      /* Adjusted left position to move it more to the right */
+      /* left: 80%; */ /* Original positioning - uncomment if preferred */
+      /* transform: translateX(-50%); */ /* Original positioning */
+
+      width: 240px; /* Increased size */
+      height: 240px; /* Increased size */
+      background: url('https://placehold.co/240x240/ffffff/000000?text=Wizard+IMG') no-repeat center center; /* Placeholder image */
+      background-size: contain;
+      z-index: 2; /* Above stars and floating items */
+      /* Use drop-shadow for glow that follows transparency */
+      filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8)) /* Cyan glow */
+              drop-shadow(0 0 5px rgba(255, 255, 255, 0.5)); /* White inner glow */
+      animation: pulseGlow 2s ease-in-out infinite; /* Pulsing animation */
+    }
+
+    /* Wizard glow animation */
+    @keyframes pulseGlow {
+      0% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
+                drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1))
+                drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+      }
+      100% {
+        filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8))
+                drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+      }
+    }
+
+    /* Chat container styles */
+    .chat-container {
+      position: absolute;
+      bottom: 160px; /* Position above the wizard */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%; /* Make width responsive */
+      max-width: 600px; /* Limit maximum width */
+      background: rgba(255, 255, 255, 0.1); /* Slightly more subtle background */
+      padding: 15px 20px;
       border-radius: 15px;
-      backdrop-filter: blur(6px);
-      border: 1px solid #ffffff40;
+      backdrop-filter: blur(8px); /* Slightly stronger blur */
+      -webkit-backdrop-filter: blur(8px); /* Prefix for Safari */
+      border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
       font-size: 16px;
       display: flex;
       flex-direction: column;
-      z-index: 3;
+      z-index: 3; /* Above wizard */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add subtle shadow */
     }
 
+    /* Chat log area */
     .chat {
-      max-height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-      white-space: pre-line;
+      max-height: 250px; /* Adjust max height as needed */
+      overflow-y: auto; /* Enable scrolling */
+      margin-bottom: 15px;
+      padding-right: 10px; /* Add padding for scrollbar */
+      white-space: pre-line; /* Preserve line breaks */
+      scrollbar-width: thin; /* Firefox scrollbar */
+      scrollbar-color: rgba(255, 255, 255, 0.3) transparent; /* Firefox scrollbar */
     }
 
+    /* Webkit scrollbar styles */
+    .chat::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    /* Individual chat messages */
     .chat-message {
       margin-bottom: 10px;
+      line-height: 1.4;
     }
 
-    .chat input {
-      width: 100%;
-      padding: 10px;
+    /* Input area */
+    .input-area {
+        display: flex; /* Use flexbox for input and potential button */
+        border-top: 1px solid rgba(255, 255, 255, 0.2); /* Separator line */
+        padding-top: 15px;
+    }
+
+    /* Text input field */
+    .input-area input[type="text"] {
+      flex-grow: 1; /* Take available space */
+      padding: 10px 15px;
       border-radius: 10px;
-      background: #ffffff20;
-      transform: translateX(-50%);
-      backdrop-filter: blur(6px);
-      border: 1px solid #ffffff40;
+      background: transparent; /* Make input background transparent */
+      border: none; /* Remove default border */
       font-size: 16px;
-      outline: none;
-      margin-top: 10px;
-      flex-direction: column;
-      z-index: 3;
+      color: white; /* Text color */
+      outline: none; /* Remove focus outline */
+      font-family: 'Courier New', Courier, monospace;
     }
 
+    /* Placeholder text style */
+    .input-area input[type="text"]::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+      opacity: 1; /* Ensure placeholder is visible */
+    }
+
+    /* Container for floating items */
+    #floating-items {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1; /* Above stars, below wizard/chat */
+        overflow: hidden; /* Prevent items going outside */
+        pointer-events: none; /* Allow clicks to pass through */
+    }
+
+    /* Individual floating elements (images) */
     .floating-element {
-      position: absolute;
-      z-index: 0;
+      position: absolute; /* Positioned relative to #floating-items */
+      opacity: 0.6; /* Make them slightly transparent */
+      /* z-index is inherited or managed by parent */
     }
-  </style>
 
-<script src="spellbook.js"></script>
-</head>
+    /* Container for stars (already absolutely positioned) */
+    #stars {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* Ensure stars don't cause scroll */
+        pointer-events: none; /* Allow clicks to pass through */
+        /* z-index handled by individual .star elements */
+    }
+
+  </style>
+  </head>
 <body>
   <div class="wizard"></div>
 
@@ -123,95 +209,154 @@
     <div class="chat" id="chat-log">
       <div class="chat-message">ChainSage: Ask me anything about the blockchain, mortal...</div>
     </div>
-    <input type="text" id="question" placeholder="type here, mortal" onkeydown="handleEnter(event)"
-    style="background-color: transparent; border: none; color: white; outline: none;">
-  
+    <div class="input-area">
+        <input type="text" id="question" placeholder="type here, mortal" onkeydown="handleEnter(event)">
+        </div>
   </div>
 
   <div id="floating-items"></div>
   <div id="stars"></div>
 
   <script>
+    // Function to handle Enter key press in the input
+    function handleEnter(event) {
+      if (event.key === 'Enter') {
+        sendMessage(); // Call function to process message (needs to be defined)
+      }
+    }
 
-    // Dynamically populate floating items from assets/floating
+    // Placeholder for sending/processing message
+    function sendMessage() {
+        const input = document.getElementById('question');
+        const chatLog = document.getElementById('chat-log');
+        const message = input.value.trim();
+
+        if (message) {
+            // Display user message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'chat-message';
+            userMessageDiv.textContent = 'You: ' + message;
+            chatLog.appendChild(userMessageDiv);
+
+            // --- TODO: Add logic here to get response from ChainSage ---
+            // Example: Call an API, use spellbook.js, etc.
+            // For now, just a placeholder response:
+            const sageResponseDiv = document.createElement('div');
+            sageResponseDiv.className = 'chat-message';
+            sageResponseDiv.textContent = 'ChainSage: Thinking... (' + message + ')'; // Placeholder
+            chatLog.appendChild(sageResponseDiv);
+            // --- End of TODO ---
+
+
+            input.value = ''; // Clear input
+            chatLog.scrollTop = chatLog.scrollHeight; // Scroll to bottom
+        }
+    }
+
+    // --- Dynamic Asset Loading ---
+
+    // Dynamically populate floating items
     const floatingDiv = document.getElementById('floating-items');
     const floatingAssets = [
-      'usd-coin.png',
-      'vechain.png',
-      'bitcoin.png',
-      'blockchain (1).png',
-      'blockchain (2).png',
-      'blockchain (3).png',
-      'blockchain (4).png',
-      'bnb.png',
-      'chainlink.png',
-      'crypto.png',
-      'cryptocurrencies.png',
-      'cryptocurrency (2).png',
-      'cryptocurrency (3).png',
-      'cryptocurrency.png',
-      'ethereum.png',
-      'graph.png',
-      'klaytn.png',
-      'online-business.png',
-      'polygon.png',
-      'shiba-inu.png',
-      'solana.png',
-      'stellar-coin.png',
-      'tether.png',
-      'ton.png'
+      'usd-coin.png', 'vechain.png', 'bitcoin.png', 'blockchain (1).png',
+      'blockchain (2).png', 'blockchain (3).png', 'blockchain (4).png',
+      'bnb.png', 'chainlink.png', 'crypto.png', 'cryptocurrencies.png',
+      'cryptocurrency (2).png', 'cryptocurrency (3).png', 'cryptocurrency.png',
+      'ethereum.png', 'graph.png', 'klaytn.png', 'online-business.png',
+      'polygon.png', 'shiba-inu.png', 'solana.png', 'stellar-coin.png',
+      'tether.png', 'ton.png'
     ];
+
+    // Base path for assets (adjust if needed)
+    const assetBasePath = './assets/floating/';
+    // Placeholder image URL generator
+    const placeholderUrl = (name, size = 40) => `https://placehold.co/${size}x${size}/777/eee?text=${name.split('.')[0].substring(0,3)}`;
 
     floatingAssets.forEach((src, index) => {
       const img = document.createElement('img');
-      img.src = `assets/floating/${src}`;
+      const fullSrc = assetBasePath + src;
+      img.src = fullSrc;
+      // Add placeholder fallback
+      img.onerror = function() { this.src = placeholderUrl(src, 40); };
+      img.alt = src.split('.')[0]; // Add alt text
       img.className = 'floating-element';
-      img.style.top = `${Math.random() * 100}%`; // Full screen height
-      img.style.left = `${Math.random() * 100}%`; // Full screen width
-      img.style.width = '40px';
+      img.style.top = `${Math.random() * 100}%`; // Position randomly within parent height
+      img.style.left = `${Math.random() * 100}%`; // Position randomly within parent width
+      img.style.width = '40px'; // Set fixed width
+      img.style.height = 'auto'; // Maintain aspect ratio
 
+      // Define unique animation name
       const animationName = `floatRandom${index}`;
+
+      // Create keyframes dynamically
+      // Uses translate for movement and rotate for subtle rotation
       const keyframes = `
         @keyframes ${animationName} {
-          0% { transform: translate(0, 0) rotate(0deg); }
-          25% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
-          50% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
-          75% { transform: translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px) rotate(${Math.random() * 20 - 10}deg); }
-          100% { transform: translate(0, 0) rotate(0deg); }
+          0% { transform: translate(0, 0) rotate(0deg); opacity: 0.5; }
+          25% { transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) rotate(${Math.random() * 15 - 7.5}deg); opacity: 0.7; }
+          50% { transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) rotate(${Math.random() * 15 - 7.5}deg); opacity: 0.6; }
+          75% { transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) rotate(${Math.random() * 15 - 7.5}deg); opacity: 0.7; }
+          100% { transform: translate(0, 0) rotate(0deg); opacity: 0.5; }
         }
       `;
-      const styleSheet = document.createElement('style');
-      styleSheet.textContent = keyframes;
-      document.head.appendChild(styleSheet);
 
-      img.style.animation = `${animationName} ${8 + Math.random() * 4}s ease-in-out infinite`;
+      // Add keyframes to the document's head
+      // Check if a style element for animations already exists
+      let styleSheet = document.getElementById('dynamic-animations');
+      if (!styleSheet) {
+          styleSheet = document.createElement('style');
+          styleSheet.id = 'dynamic-animations';
+          document.head.appendChild(styleSheet);
+      }
+      // Append new keyframes rule
+      styleSheet.textContent += keyframes;
+
+      // Apply animation to the image
+      img.style.animation = `${animationName} ${8 + Math.random() * 5}s ease-in-out infinite alternate`; // Use alternate to smooth start/end
       floatingDiv.appendChild(img);
     });
 
     // Dynamically populate stars
     const starsDiv = document.getElementById('stars');
-    const starCount = 100; // Number of stars
+    const starCount = 150; // Increased star count for denser field
 
     for (let i = 0; i < starCount; i++) {
       const star = document.createElement('div');
       star.className = 'star';
-      
-      // Random size (0.5px to 2px)
-      const size = 0.5 + Math.random() * 1.5;
+
+      // Random size (0.5px to 2.5px)
+      const size = 0.5 + Math.random() * 2;
       star.style.width = `${size}px`;
       star.style.height = `${size}px`;
-      
-      // Random position
+
+      // Random position across the whole screen
       star.style.top = `${Math.random() * 100}%`;
       star.style.left = `${Math.random() * 100}%`;
-      
-      // Random twinkle animation
-      const duration = 2 + Math.random() * 3; // 2-5 seconds
-      const delay = Math.random() * 2; // 0-2 seconds
-      star.style.animation = `twinkle ${duration}s infinite ${delay}s`;
-      
+
+      // Random twinkle animation (duration and delay)
+      const duration = 2.5 + Math.random() * 4; // 2.5 - 6.5 seconds
+      const delay = Math.random() * 5; // 0-5 seconds delay
+      star.style.animation = `twinkle ${duration}s infinite ${delay}s ease-in-out`; // Added ease-in-out
+
       starsDiv.appendChild(star);
     }
+
+    // Add basic error handling for image loading (wizard)
+    const wizardElement = document.querySelector('.wizard');
+    const wizardImg = new Image();
+    wizardImg.src = 'assets/wizard.png'; // Make sure this path is correct
+    wizardImg.onerror = () => {
+        console.warn('Wizard image failed to load. Using placeholder.');
+        // Placeholder is already set via CSS background, this just confirms the error
+    };
+    wizardImg.onload = () => {
+        // If you need to do something once the *actual* wizard image loads, do it here.
+        // For now, we rely on the CSS background property.
+        // To force update if CSS didn't pick it up (unlikely but possible):
+        // wizardElement.style.backgroundImage = `url('${wizardImg.src}')`;
+    };
+
+
   </script>
 </body>
 </html>
