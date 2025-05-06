@@ -112,7 +112,7 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
             * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead. 
             * If a query is not possible but you can answer the question based on what you know, return a JSON object with the answer and mention "not real time data". 
             * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a blockchain wizard, get the user interested in web3, respond to what user asked) 
-        
+        6. Dont say things like "I cannot answer this question with the available tools.", instead explain what tools you have and your capabilities based on your training data and relevant endpoint(s) mentioned above.
         Example 1:
         User Question: "What is the price of Bitcoin?"
         
