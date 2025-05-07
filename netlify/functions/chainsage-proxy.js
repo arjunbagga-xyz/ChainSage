@@ -1,8 +1,9 @@
 // This Netlify Serverless Function acts as a backend proxy
 // to securely handle API calls, now to Modula instead of Gemini and Flipside.
-// It receives a question from the frontend, uses Gemini to
-// determine the appropriate Modula API endpoint and parameters,
-// calls the Modula API, and uses Gemini to summarize the response.
+// It receives the entire chat history from the frontend, uses Gemini to
+// determine the appropriate Modula API endpoint and parameters based on the
+// latest message and history, calls the Modula API, and uses Gemini to
+// summarize the response in the context of the conversation.
 
 // Netlify's Node.js environment supports native fetch
 // const fetch = require('node-fetch'); // Uncomment if using node-fetch locally
@@ -42,7 +43,7 @@ async function fetchApi(url, options, serviceName) {
         };
 
         if (serviceName === 'Modula' && MODULA_API_KEY) {
-            defaultHeaders['Authorization'] =  MODULA_API_KEY;
+            defaultHeaders['Authorization'] = MODULA_API_KEY;
         }
 
         const fetchOptions = {
@@ -83,8 +84,8 @@ async function fetchApi(url, options, serviceName) {
     } catch (error) {
         console.error(`Fetch error during call to ${serviceName}:`, error);
          if (error.service) {
-            throw error;
-        }
+             throw error;
+         }
         const fetchErr = new Error(`API call failed to ${serviceName}: ${error.message}${responseBodyText ? ` Body: ${responseBodyText.substring(0, 200)}...` : ''}`);
         fetchErr.originalError = error;
         throw fetchErr;
@@ -93,86 +94,121 @@ async function fetchApi(url, options, serviceName) {
 
 // --- Modula API Interaction Functions ---
 
-// 1.  Function to get the relevant Modula endpoint and extract parameters
-async function getModulaEndpointAndParams(question, availableEndpoints) {
-    const prompt = `
-        You are an AI assistant designed to understand user questions about cryptocurrency data and identify the most appropriate API endpoint from a given list.
-        
-        Here is a list of available API endpoints with their descriptions and required parameters:
-        ${JSON.stringify(availableEndpoints, null, 2)}
-        
-        Your task is to:
-        0.  Analyze the endpoint(s) from the list above and determine possibilities of what can and cannot be asked using all combinations of filters/parameters/etc with a single API call.
-        1.  Analyze the user's question and determine the user's intent.
-        2.  Identify the single most relevant endpoint(s) from the list above that can fulfill the user's request.
-        3.  Extract any parameters mentioned in the user's question that match the 'required_parameters' of the identified endpoint(s).  The parameter names are case-sensitive.
-        4.  Determine if a query is possible.
-        5.  Generate a response, following these rules:
-            * Recheck the endppint(s) and form the the right API call using any single API call combination of parameters, filters, sort, etc.
-            * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
-            * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead (dont mention endpoints or tech lingo, just frame questions users can ask)
-            * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead. 
-            * If a query is not possible but you can answer the question based on what you know, return a JSON object with the answer and mention "not real time data". 
-            * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a blockchain wizard, get the user interested in web3, respond to what user asked) 
-        6. Dont say things like "I cannot answer this question with the available tools.", instead explain what tools you have and your capabilities based on your training data and relevant endpoint(s) mentioned above.
-        Example 1:
-        User Question: "What is the price of Bitcoin?"
-        
-        Your Response:
-        {
-            "can_query": true,
-            "endpoints": [
-                {
-                    "endpoint_group": "Octopus - Market API",
-                    "name": "Get Market Data",
-                    "extracted_parameters": {
-                        "id": "bitcoin"
-                    },
-                    "required_parameters": ["id"],
-                    "path": "/1/market/data"
-                }
-            ]
-        }
-        
-        Example 2:
-        User Question: "Show me the historical data"
-        
-        Your Response:
-        {
-            "can_query": false,
-            "message": "Missing parameters: id, from, to.  Please specify the asset ID and the time range."
-        }
-        
-         Example 3:
-         User Question: "tell me about the top gainers in the last 24 hours"
-         Your Response:
-        {
-            "can_query": false,
-            "message": "I cannot answer this question with the available tools."
-        }
+// 1. Function to get the relevant Modula endpoint and extract parameters using chat history
+// This function now accepts the full chat history array
+async function getModulaEndpointAndParams(chatHistory, availableEndpoints) {
+    // Construct the system instruction part of the prompt
+    const systemInstruction = `
+You are an AI assistant designed to understand user questions about cryptocurrency data and identify the most appropriate API endpoint from a given list.
 
-         Example 4:
-         User Question: "Hi"
-         Your Response:
+Here is a list of available API endpoints with their descriptions and required parameters:
+${JSON.stringify(availableEndpoints, null, 2)}
+
+Your task is to analyze the conversation history and the latest user question to:
+0. Analyze the endpoint(s) from the list above and determine possibilities of what can and cannot be asked using all combinations of filters/parameters/etc with a single API call.
+1. Identify the single most relevant endpoint(s) from the list above that can fulfill the user's *latest* request, considering the context of the conversation.
+2. Extract any parameters mentioned in the user's *latest* question that match the 'required_parameters' of the identified endpoint(s). The parameter names are case-sensitive. You may also infer parameters from the conversation history if the latest message is incomplete but the intent is clear from context.
+3. Determine if a query is possible based on the *latest* request and available parameters (including inferred ones).
+4. Generate a response, following these rules:
+    * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
+    * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead (dont mention endpoints or tech lingo, just frame questions users can ask)
+    * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead.
+    * If a query is not possible but you can answer the question based on what you know, return a JSON object with the answer and mention "not real time data".
+    * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a blockchain wizard, get the user interested in web3, respond to what user asked)
+5. Dont say things like "I cannot answer this question with the available tools.", instead explain what tools you have and your capabilities based on your training data and relevant endpoint(s) mentioned above.
+
+Example 1:
+User Question: "What is the price of Bitcoin?"
+
+Your Response:
+{
+    "can_query": true,
+    "endpoints": [
         {
-            "can_query": false,
-            "message": "Welcome mortal, are you interested in learning about the blockchain. ask me about the wallets you wish to spy on"
+            "endpoint_group": "Octopus - Market API",
+            "name": "Get Market Data",
+            "extracted_parameters": {
+                "id": "bitcoin"
+            },
+            "required_parameters": ["id"],
+            "path": "/1/market/data"
         }
+    ]
+}
+
+Example 2 (Contextual):
+History: [{ "role": "user", "content": "What is the price of Bitcoin?" }, { "role": "model", "content": "{...modula response summary...}" }]
+User Question: "How about Ethereum?"
+
+Your Response:
+{
+    "can_query": true,
+    "endpoints": [
+        {
+            "endpoint_group": "Octopus - Market API",
+            "name": "Get Market Data",
+            "extracted_parameters": {
+                "id": "ethereum" // Inferred from context
+            },
+            "required_parameters": ["id"],
+            "path": "/1/market/data"
+        }
+    ]
+}
+
+Example 3:
+User Question: "Show me the historical data"
+
+Your Response:
+{
+    "can_query": false,
+    "message": "Missing parameters: id, from, to. Please specify the asset ID and the time range."
+}
+
+Example 4:
+User Question: "tell me about the top gainers in the last 24 hours"
+Your Response:
+{
+    "can_query": false,
+    "message": "I cannot answer this question with the available tools."
+}
+
+Example 5:
+User Question: "Hi"
+Your Response:
+{
+    "can_query": false,
+    "message": "Welcome mortal, are you interested in learning about the blockchain. ask me about the wallets you wish to spy on"
+}
 
 
-        Example 5:
-        User Question: "what were the biggest whale moves of the day"
-        
-        Your Response:
-        {
-            "can_query": false,
-            "message":" Mortal, you may ask me about the highest volume trades of the day, and then ask me about the wallet addresses of those. ask better."
-        }
-        
-        Analyze the following user question and provide your response as a JSON object:
-        
-        User Question: "${question}"
-    `;
+Example 6:
+User Question: "what were the biggest whale moves of the day"
+
+Your Response:
+{
+    "can_query": false,
+    "message":" Mortal, you may ask me about the highest volume trades of the day, and then ask me about the wallet addresses of those. ask better."
+}
+
+Analyze the following conversation history and provide your response as a JSON object based on the *latest* user message:
+`;
+
+    // Prepare the contents array for the Gemini API call
+    // The Gemini API expects an array of message objects { role: 'user'|'model', parts: [{ text: '...' }] }
+    // We map the incoming chatHistory format to this structure.
+    const contents = chatHistory.map(msg => ({
+        // Ensure the role is either 'user' or 'model' as required by Gemini
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+    }));
+
+    // Add the system instruction as the first message in the conversation flow
+    // Note: System instructions are typically handled differently by models.
+    // For Gemini 1.5/2.0, including it as the first user message often works well for this type of task.
+    // For models that support a dedicated system role, you might adjust this.
+    const finalContents = [{ role: 'user', parts: [{ text: systemInstruction }] }, ...contents];
+
 
     const options = {
         method: 'POST',
@@ -180,37 +216,48 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
             'Content-Type': 'application/json',
             'x-goog-api-key': GEMINI_API_KEY,
         },
+        // Pass the entire contents array representing the conversation history
         body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
+            contents: finalContents,
             generationConfig: NL_TO_ENDPOINT_CONFIG,
         }),
     };
 
     const data = await fetchApi(GEMINI_API_BASE_URL, options, 'Gemini (NL to Endpoint)');
 
+    // --- Error Handling and Parsing ---
     if (!data?.candidates?.[0]?.content?.parts?.[0]?.text) {
         console.error("Invalid response structure from Gemini (NL to Endpoint):", data);
+        // Check for safety blocks
+        if (data?.promptFeedback?.blockReason) {
+             console.error("Gemini blocked the prompt:", data.promptFeedback.blockReason);
+             throw new Error(`Your query was blocked by the safety system. Reason: ${data.promptFeedback.blockReason}`);
+        }
         throw new Error('Received invalid response structure from Gemini (NL to Endpoint).');
     }
 
     let geminiResponse;
     try {
-        geminiResponse = JSON.parse(data.candidates[0].content.parts[0].text.trim());
+        // Attempt to parse the JSON response from Gemini.
+        // It might be just the JSON or wrapped in ```json ``` markdown block.
+        const textResponse = data.candidates[0].content.parts[0].text.trim();
+        const jsonMatch = textResponse.match(/```json\n([\s\S]*)\n```/);
+
+        if (jsonMatch && jsonMatch[1]) {
+            // If wrapped in ```json ```, parse the content inside
+            geminiResponse = JSON.parse(jsonMatch[1]);
+        } else {
+            // Otherwise, assume the whole response is JSON
+            geminiResponse = JSON.parse(textResponse);
+        }
+       console.log("Parsed Gemini response:", geminiResponse);
+
     } catch (e) {
         console.error("Gemini output was not valid JSON:", data.candidates[0].content.parts[0].text.trim(), e);
-        //  Attempt to remove the ```json ``` block, and try again.
-        const cleanedText = data.candidates[0].content.parts[0].text.trim().replace(/```json\n([\s\S]*)\n```/g, '$1');
-        try {
-            geminiResponse = JSON.parse(cleanedText);
-            console.log("Successfully parsed cleaned Gemini output.");
-        }
-        catch (e2) {
-            throw new Error("Gemini output was not valid JSON.");
-        }
+        throw new Error("Gemini output was not valid JSON.");
     }
     return geminiResponse;
 }
-
 
 
 // 2. Function to call the Modula API
@@ -229,7 +276,7 @@ async function callModulaApi(endpoint, params) {
     const options = {
         method: 'GET', // All Modula endpoints in docs.json use GET
         headers: {
-            //  'Content-Type': 'application/json', //removed this
+            // 'Content-Type': 'application/json', //removed this
         },
     };
 
@@ -239,21 +286,25 @@ async function callModulaApi(endpoint, params) {
 
 
 // 3. Function to summarize the data using Gemini
+// This function still only takes the latest question and the data for summarization.
+// For more contextual summaries, you could pass a summary of the history or recent turns,
+// but passing the full history here might exceed token limits and is often unnecessary
+// for just summarizing the API response in relation to the immediate question.
 async function summarizeModulaData(modulaData, originalQuestion) {
     const dataToSend = JSON.stringify(modulaData);
     const prompt = `
-        You are an insightful data analyst specializing in cryptocurrency data.
-        A user asked the following question: "${originalQuestion}"
-        Data was retrieved from the Modula API. Here is the relevant data:
-        ${dataToSend}
-        
-        Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
-        Focus on answering the user's original question using the data provided.
-        If the data doesn't directly answer the question, state that and summarize what the data DOES show.
-        Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
-        If the data indicates an error or no results, state that clearly.
-        Talk like a wizard.
-    `;
+You are an insightful data analyst specializing in cryptocurrency data.
+A user asked the following question: "${originalQuestion}"
+Data was retrieved from the Modula API. Here is the relevant data:
+${dataToSend}
+
+Based on this data and the original question, provide a concise and easy-to-understand summary or insight.
+Focus on answering the user's original question using the data provided.
+If the data doesn't directly answer the question, state that and summarize what the data DOES show.
+Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
+If the data indicates an error or no results, state that clearly.
+Talk like a wizard.
+`;
 
     const options = {
         method: 'POST',
@@ -262,6 +313,8 @@ async function summarizeModulaData(modulaData, originalQuestion) {
             'x-goog-api-key': GEMINI_API_KEY,
         },
         body: JSON.stringify({
+            // For summarization, we typically only need the specific data and the immediate question.
+            // Passing the full history here is usually not required and can increase token usage.
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: SUMMARIZATION_CONFIG,
         }),
@@ -271,6 +324,10 @@ async function summarizeModulaData(modulaData, originalQuestion) {
 
     if (!result?.candidates?.[0]?.content?.parts?.[0]?.text) {
         console.error("Invalid response structure from Gemini (Summarization):", result);
+         if (result?.promptFeedback?.blockReason) {
+             console.error("Gemini blocked the prompt:", result.promptFeedback.blockReason);
+             throw new Error(`Summarization query was blocked by the safety system. Reason: ${result.promptFeedback.blockReason}`);
+         }
         throw new Error('Received invalid response structure from Gemini during summarization.');
     }
 
@@ -280,6 +337,7 @@ async function summarizeModulaData(modulaData, originalQuestion) {
 }
 
 // --- Netlify Function Handler ---
+// This handler now expects the entire chat history in the request body.
 exports.handler = async function (event, context) {
     console.log("Received request:", {
         httpMethod: event.httpMethod,
@@ -294,38 +352,77 @@ exports.handler = async function (event, context) {
         };
     }
 
-    let question;
+    let chatHistory; // Changed from 'question'
+    let latestQuestion = ''; // Variable to hold the latest user question
+
     try {
         const body = JSON.parse(event.body);
-        question = body.question;
-        if (!question || typeof question !== 'string' || question.trim() === '') {
-            console.warn("Bad Request: Invalid or missing 'question' in body.");
+        // Expecting the chat history in a field named 'history'
+        chatHistory = body.history;
+
+        // Validate the incoming chat history
+        if (!Array.isArray(chatHistory) || chatHistory.length === 0) {
+            console.warn("Bad Request: Invalid or missing 'history' in body. Expected a non-empty array.");
             return {
                 statusCode: 400,
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: "Invalid or missing 'question' in request body." }),
+                body: JSON.stringify({ error: "Invalid or missing 'history' in request body. Please provide a non-empty array of messages." }),
             };
         }
+
+        // Basic validation for messages within the history
+        const isValidHistory = chatHistory.every(msg =>
+            typeof msg === 'object' &&
+            msg !== null &&
+            (msg.role === 'user' || msg.role === 'model') && // Ensure roles are valid
+            typeof msg.content === 'string' &&
+            msg.content.trim() !== ''
+        );
+
+        if (!isValidHistory) {
+             console.warn("Bad Request: Invalid message format in 'history' array.");
+             return {
+                 statusCode: 400,
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ error: "Invalid message format in 'history' array. Each message must be an object with 'role' ('user' or 'model') and non-empty 'content'." }),
+             };
+        }
+
+
+        // The latest user question is the content of the last message in the history
+        const lastMessage = chatHistory[chatHistory.length - 1];
+        if (lastMessage.role !== 'user') {
+             console.warn("Bad Request: The last message in history must be from the 'user'.");
+             return {
+                 statusCode: 400,
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ error: "The last message in the chat history must be from the 'user'." }),
+             };
+        }
+        latestQuestion = lastMessage.content;
+
+
     } catch (error) {
-        console.error('Error parsing request body:', error);
+        console.error('Error parsing request body or validating history:', error);
         return {
             statusCode: 400,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: 'Invalid JSON request body.' }),
+            body: JSON.stringify({ error: `Invalid JSON request body or history format: ${error.message}` }),
         };
     }
 
-    console.log(`Processing question: "${question}"`);
+    console.log(`Processing request with history. Latest question: "${latestQuestion}"`);
 
     let finalInsight = "An unexpected error occurred.";
     let statusCode = 500;
 
     try {
-        // 1. Get Modula endpoint and parameters
-        const endpointData = await getModulaEndpointAndParams(question,  JSON.parse(JSON.stringify(require('./docs.json'))));
+        // 1. Get Modula endpoint and parameters using the chat history
+        // Pass the entire chatHistory array to the function
+        const endpointData = await getModulaEndpointAndParams(chatHistory, JSON.parse(JSON.stringify(require('./docs.json'))));
         console.log("Step 1: Endpoint and Parameters determined:", endpointData);
 
-        // 2.  Check if we can query.  If not, return to user.
+        // 2. Check if we can query. If not, return the message from the LLM.
         if (!endpointData.can_query) {
             return {
                 statusCode: 200,
@@ -333,19 +430,22 @@ exports.handler = async function (event, context) {
                 body: JSON.stringify({ insight: endpointData.message }), // Return the message from LLM
             };
         }
+
         // 3. Call Modula API (if query is possible)
-        const modulaResponse = await callModulaApi(endpointData.endpoints[0], endpointData.endpoints[0].extracted_parameters);  //changed from endpointData to endpointData.endpoints[0]
+        // Use the extracted parameters from the LLM's response
+        const modulaResponse = await callModulaApi(endpointData.endpoints[0], endpointData.endpoints[0].extracted_parameters);
         console.log("Step 2: Modula API called successfully.");
 
-        // 4. Summarize the data
-        finalInsight = await summarizeModulaData(modulaResponse, question);
+        // 4. Summarize the data using Gemini
+        // Pass the Modula response data and the latest question for summarization
+        finalInsight = await summarizeModulaData(modulaResponse, latestQuestion);
         console.log("Step 3: Data summarized.");
         statusCode = 200;
 
     } catch (error) {
         console.error('Error in Netlify function pipeline:', error);
         finalInsight = `ChainSage Error: ${error.message}`;
-        statusCode = 500;
+        statusCode = error.status || 500; // Use error status if available, otherwise default to 500
     }
 
     return {
