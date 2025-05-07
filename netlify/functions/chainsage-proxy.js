@@ -102,13 +102,14 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         ${JSON.stringify(availableEndpoints, null, 2)}
         
         Your task is to:
+        0.  Analyze the endpoint(s) from the list above and determine possibilities of what can and cannot be asked
         1.  Analyze the user's question and determine the user's intent.
         2.  Identify the single most relevant endpoint(s) from the list above that can fulfill the user's request.
         3.  Extract any parameters mentioned in the user's question that match the 'required_parameters' of the identified endpoint(s).  The parameter names are case-sensitive.
         4.  Determine if a query is possible.
         5.  Generate a response, following these rules:
             * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
-            * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead
+            * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead (dont mention endpoints or tech lingo, just frame questions users can ask)
             * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead. 
             * If a query is not possible but you can answer the question based on what you know, return a JSON object with the answer and mention "not real time data". 
             * If a query is not possible and the user question was simply making conversation, return a JSON object with a response (talk like a blockchain wizard, get the user interested in web3, respond to what user asked) 
@@ -250,6 +251,7 @@ async function summarizeModulaData(modulaData, originalQuestion) {
         If the data doesn't directly answer the question, state that and summarize what the data DOES show.
         Keep the summary brief (2-3 sentences), unless more detail is necessary to answer the question based on the data.
         If the data indicates an error or no results, state that clearly.
+        Talk like a wizard.
     `;
 
     const options = {
