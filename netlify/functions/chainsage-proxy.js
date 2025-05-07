@@ -102,12 +102,13 @@ async function getModulaEndpointAndParams(question, availableEndpoints) {
         ${JSON.stringify(availableEndpoints, null, 2)}
         
         Your task is to:
-        0.  Analyze the endpoint(s) from the list above and determine possibilities of what can and cannot be asked
+        0.  Analyze the endpoint(s) from the list above and determine possibilities of what can and cannot be asked using all combinations of filters/parameters/etc with a single API call.
         1.  Analyze the user's question and determine the user's intent.
         2.  Identify the single most relevant endpoint(s) from the list above that can fulfill the user's request.
         3.  Extract any parameters mentioned in the user's question that match the 'required_parameters' of the identified endpoint(s).  The parameter names are case-sensitive.
         4.  Determine if a query is possible.
         5.  Generate a response, following these rules:
+            * Recheck the endppint(s) and form the the right API call using any single API call combination of parameters, filters, sort, etc.
             * If a query is possible, return a JSON object containing the endpoint(s) and extracted parameters.
             * If a query is not possible using just 1 API call, but you can get the data using multiple calls, return a JSON object with a message telling users the questions they can ask instead (dont mention endpoints or tech lingo, just frame questions users can ask)
             * If a query is not possible, return a JSON object explaining why, what information is missing or what can the user ask instead. 
